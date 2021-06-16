@@ -4,17 +4,22 @@ import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.Rect
+import android.util.AttributeSet
 import android.view.View
 import android.widget.ScrollView
 import dev.coc12.momotetsu.R
 import dev.coc12.momotetsu.service.DiagonalScrollView
 import dev.coc12.momotetsu.service.Loader
 
-class MapDrawer(context: Context) : View(context) {
+class MapDrawer @JvmOverloads constructor(
+    context: Context,
+    attrs: AttributeSet? = null,
+    defStyleAttr: Int = 0,
+    private val mapManager: MapManager? = null,
+) : View(context, attrs, defStyleAttr) {
     private val chipSize = 32
     private val dp = resources.displayMetrics.density
     private val mapChip = Loader().loadChipSet(resources, R.drawable.chipset, chipSize)
-    private val mapData = Loader().loadMapData(resources, R.raw.map)
 
     private var paint: Paint = Paint()
     private var zoomRate = 1.5
@@ -27,9 +32,12 @@ class MapDrawer(context: Context) : View(context) {
         screenWidth = widthMeasureSpec
         screenHeight = heightMeasureSpec
 
+        if (mapManager == null) {
+            return
+        }
         setMeasuredDimension(
-            mapData[0].size * realChipSize,
-            mapData.size * realChipSize
+            mapManager.getWidth() * realChipSize,
+            mapManager.getHeight() * realChipSize
         )
     }
 
@@ -43,7 +51,10 @@ class MapDrawer(context: Context) : View(context) {
      * @param canvas Canvas
      */
     private fun drawMap(canvas: Canvas) {
-        for ((y, mapRow) in mapData.withIndex()) {
+        if (mapManager == null) {
+            return
+        }
+        for ((y, mapRow) in mapManager.withIndex()) {
             for ((x, chip) in mapRow.withIndex()) {
                 canvas.drawBitmap(
                     mapChip[Integer.parseInt(chip)],

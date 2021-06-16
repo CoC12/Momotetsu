@@ -6,6 +6,7 @@ import android.widget.ScrollView
 import androidx.appcompat.app.AppCompatActivity
 import dev.coc12.momotetsu.R
 import dev.coc12.momotetsu.core.MapDrawer
+import dev.coc12.momotetsu.core.MapManager
 import dev.coc12.momotetsu.service.DiagonalScrollView
 
 class MainActivity : AppCompatActivity() {
@@ -15,7 +16,8 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val mapDrawer = MapDrawer(context)
+        val mapManager = MapManager(context)
+        val mapDrawer = MapDrawer(context, mapManager = mapManager)
         val viewContainer: RelativeLayout = findViewById(R.id.view_container)
         val diagonalScrollView: DiagonalScrollView = findViewById(R.id.diagonal_scroll_view)
         val scrollView: ScrollView = findViewById(R.id.scroll_view)
