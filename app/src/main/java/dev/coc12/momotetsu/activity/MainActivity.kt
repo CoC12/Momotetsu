@@ -1,12 +1,11 @@
 package dev.coc12.momotetsu.activity
 
 import android.os.Bundle
-import android.widget.RelativeLayout
 import android.widget.ScrollView
 import androidx.appcompat.app.AppCompatActivity
 import dev.coc12.momotetsu.R
-import dev.coc12.momotetsu.core.MapDrawer
-import dev.coc12.momotetsu.core.MapManager
+import dev.coc12.momotetsu.core.GameManager
+import dev.coc12.momotetsu.room.Player
 import dev.coc12.momotetsu.service.DiagonalScrollView
 
 class MainActivity : AppCompatActivity() {
@@ -16,15 +15,14 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val mapManager = MapManager(context)
-        val mapDrawer = MapDrawer(context, mapManager = mapManager)
-        val viewContainer: RelativeLayout = findViewById(R.id.view_container)
         val diagonalScrollView: DiagonalScrollView = findViewById(R.id.diagonal_scroll_view)
         val scrollView: ScrollView = findViewById(R.id.scroll_view)
-        scrollView.addView(mapDrawer)
+        val gameManager = GameManager(context, diagonalScrollView, scrollView)
 
-        viewContainer.post {
-            mapDrawer.setScroll(13, 11, diagonalScrollView, scrollView)
-        }
+        val player1 = Player(0, "test1")
+        val player2 = Player(0, "test2")
+        gameManager.addPlayer(player1)
+        gameManager.addPlayer(player2)
+        gameManager.startGame()
     }
 }
