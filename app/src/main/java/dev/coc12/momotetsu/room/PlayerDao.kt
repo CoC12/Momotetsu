@@ -9,7 +9,7 @@ import androidx.room.Query
 interface PlayerDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun updateOrCreate(player: Player)
+    fun updateOrCreate(player: Player): Long
 
     @Query("SELECT * FROM player WHERE gameId = :gameId")
     fun get(gameId: Long): List<Player>
