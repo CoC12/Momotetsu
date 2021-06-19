@@ -4,7 +4,7 @@ import dev.coc12.momotetsu.room.Player
 
 class PlayerList {
     private var player: MutableList<Player> = mutableListOf()
-    private var turnIndex: Int = 0
+    var turnIndex: Int = 0
 
     /**
      * プレイヤーを追加する。
@@ -35,10 +35,14 @@ class PlayerList {
 
     /**
      * ターンプレイヤーを次のプレーヤーにする。
+     *
+     * @return Boolean 年目も変わったか
      */
-    fun changeTurn() {
+    fun changeTurn(): Boolean {
         if (++turnIndex >= player.size) {
             turnIndex = 0
+            return true
         }
+        return false
     }
 }

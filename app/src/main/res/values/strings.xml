@@ -1,3 +1,5 @@
 <resources>
-    <string name="app_name">Momotetsu</string>
+    <string name="app_name">桃鉄 for Android</string>
+
+    <string name="dice_button_label">さいころ</string>
 </resources>
