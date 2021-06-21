@@ -28,6 +28,15 @@
             android:id="@+id/dice"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/dice_button_label" />
+            android:text="@string/dice_button_label"
+            tools:ignore="ButtonStyle" />
+
+        <Button
+            android:id="@+id/move"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/move_button_label"
+            android:visibility="gone"
+            tools:ignore="ButtonStyle" />
     </LinearLayout>
 </RelativeLayout>

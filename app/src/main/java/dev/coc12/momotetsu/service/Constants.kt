@@ -14,5 +14,19 @@ class Constants {
             R.color.player_color_yellow,
             R.color.player_color_green,
         )
+        val ASSET_PLAYER_CARS: List<String> = listOf(
+            "car_red.png",
+            "car_blue.png",
+            "car_yellow.png",
+            "car_green.png",
+        )
+        val ASSET_DICES: List<String> = listOf(
+            "dice1.png",
+            "dice2.png",
+            "dice3.png",
+            "dice4.png",
+            "dice5.png",
+            "dice6.png",
+        )
     }
 }
