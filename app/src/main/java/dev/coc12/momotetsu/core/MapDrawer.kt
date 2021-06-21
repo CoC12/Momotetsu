@@ -8,19 +8,25 @@ import android.util.AttributeSet
 import android.view.View
 import android.widget.ScrollView
 import dev.coc12.momotetsu.R
+import dev.coc12.momotetsu.service.Constants
 import dev.coc12.momotetsu.service.DiagonalScrollView
 import dev.coc12.momotetsu.service.Loader
 
 class MapDrawer @JvmOverloads constructor(
     context: Context,
+    private val scrollViewX: DiagonalScrollView? = null,
+    private val scrollViewY: ScrollView? = null,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0,
-    private val mapManager: MapManager? = null,
 ) : View(context, attrs, defStyleAttr) {
+    private val mapManager: MapManager = MapManager(context)
     private val chipSize = 32
     private val dp = resources.displayMetrics.density
-    private val mapChip = Loader().loadChipSet(resources, R.drawable.chipset, chipSize)
+    private val mapChip = Loader(context).loadChipSet(R.drawable.chipset, chipSize)
+    private val playerBmpList = Loader(context).loadImageAssets(Constants.ASSET_PLAYER_CARS)
+    private val srcRect = Rect(0, 0, playerBmpList[0].width, playerBmpList[0].height)
 
+    var playerList: PlayerList? = null
     private var paint: Paint = Paint()
     private var zoomRate = 1.5
     private var realChipSize: Int = 0
@@ -32,9 +38,6 @@ class MapDrawer @JvmOverloads constructor(
         screenWidth = widthMeasureSpec
         screenHeight = heightMeasureSpec
 
-        if (mapManager == null) {
-            return
-        }
         setMeasuredDimension(
             mapManager.getWidth() * realChipSize,
             mapManager.getHeight() * realChipSize
@@ -43,6 +46,7 @@ class MapDrawer @JvmOverloads constructor(
 
     override fun onDraw(canvas: Canvas) {
         drawMap(canvas)
+        drawPlayer(canvas)
     }
 
     /**
@@ -51,9 +55,6 @@ class MapDrawer @JvmOverloads constructor(
      * @param canvas Canvas
      */
     private fun drawMap(canvas: Canvas) {
-        if (mapManager == null) {
-            return
-        }
         for ((y, mapRow) in mapManager.withIndex()) {
             for ((x, chip) in mapRow.withIndex()) {
                 canvas.drawBitmap(
@@ -72,15 +73,53 @@ class MapDrawer @JvmOverloads constructor(
     }
 
     /**
+     * プレイヤーを描画する。
+     *
+     * @param canvas Canvas
+     */
+    private fun drawPlayer(canvas: Canvas) {
+        for ((index, player) in playerList!!.withIndex()) {
+            val playerRect = Rect(
+                ((player.positionX + 0.5) * realChipSize).toInt(),
+                ((player.positionY + 1.5) * realChipSize - realChipSize * 2).toInt(),
+                ((player.positionX + 0.5) * realChipSize + realChipSize * 2).toInt(),
+                ((player.positionY + 1.5) * realChipSize - realChipSize * 2 + realChipSize).toInt()
+            )
+            canvas.drawBitmap(playerBmpList[index], srcRect, playerRect, paint)
+        }
+    }
+
+
+    /**
      * マップを指定した位置までスクロールする。
      *
-     * @param x スクロール先のx座標
-     * @param y スクロール先のy座標
-     * @param scrollViewX X方向のScrollView
-     * @param scrollViewY Y方向のScrollView
+     * @param x スクロール先のx座標 (マス)
+     * @param y スクロール先のy座標 (マス)
      */
-    fun setScroll(x: Int, y: Int, scrollViewX: DiagonalScrollView, scrollViewY: ScrollView) {
+    fun setScroll(x: Int, y: Int) {
+        if (scrollViewX == null || scrollViewY == null) {
+            return
+        }
         scrollViewX.scrollX = ((x + 0.5) * realChipSize).toInt() - screenWidth / 2
         scrollViewY.scrollY = ((y + 0.5) * realChipSize).toInt() - screenHeight / 2
+    }
+
+    /**
+     * px単位の座標からマス単位の座標に変換する。
+     *
+     * @param x Int x座標 (px)
+     * @param x Int y座標 (px)
+     * @return Pair<Int, Int>
+     */
+    fun getPosition(x: Float, y: Float): Pair<Int, Int> {
+        return Pair((x / realChipSize).toInt(), (y / realChipSize).toInt())
+    }
+
+    /**
+     * 呼び出し元(GameManager)でsetOnTouchListenerを使うためオーバーライド。
+     */
+    override fun performClick(): Boolean {
+        super.performClick()
+        return true
     }
 }

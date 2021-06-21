@@ -45,4 +45,11 @@ class PlayerList {
         }
         return false
     }
+
+    /**
+     * インデックス付きのPlayerListを返す。
+     */
+    fun withIndex(): Iterable<IndexedValue<Player>> {
+        return player.withIndex()
+    }
 }

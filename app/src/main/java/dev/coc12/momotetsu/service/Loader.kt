@@ -1,6 +1,7 @@
 package dev.coc12.momotetsu.service
 
-import android.content.res.Resources
+import android.content.Context
+import android.content.res.AssetManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import java.io.BufferedReader
@@ -8,21 +9,43 @@ import java.io.IOException
 import java.io.InputStream
 import java.io.InputStreamReader
 
-class Loader {
+class Loader(private val context: Context) {
+
+    /**
+     * Assetから画像を読み込みBitmapのListを返す。
+     *
+     * @param srcPaths List<String> 画像パスのList
+     * @return List<Bitmap>
+     */
+    fun loadImageAssets(srcPaths: List<String>): List<Bitmap> {
+        val assetManager: AssetManager = context.assets
+        var inputStream: InputStream? = null
+        val assetList = mutableListOf<Bitmap>()
+
+        for (srcPath in srcPaths) {
+            try {
+                inputStream = assetManager.open(srcPath)
+            } catch (e: IOException) {
+                e.printStackTrace()
+            }
+            assetList.add(BitmapFactory.decodeStream(inputStream))
+        }
+        inputStream?.close()
+        return assetList
+    }
 
     /**
      * Bitmapからチップセットを取得する。
      *
-     * @param resource Resources
      * @param resourceId マップのリソースID
      * @param chipSize チップサイズの1辺のピクセル数
      * @return Bitmapチップセット
      */
-    fun loadChipSet(resource: Resources, resourceId: Int, chipSize: Int): MutableList<Bitmap> {
+    fun loadChipSet(resourceId: Int, chipSize: Int): MutableList<Bitmap> {
         val chipSetList: MutableList<Bitmap> = mutableListOf()
         val options = BitmapFactory.Options()
         options.inScaled = false
-        val src = BitmapFactory.decodeResource(resource, resourceId, options)
+        val src = BitmapFactory.decodeResource(context.resources, resourceId, options)
 
         for (i in 0 until src.width / chipSize) {
             chipSetList.add(
@@ -39,23 +62,22 @@ class Loader {
     }
 
     /**
-     * CSVファイルからMap情報を取得する。
+     * CSVファイルを読み込む。
      *
-     * @param resource Resources
      * @param resourceId マップのリソースID
-     * @return Map情報
+     * @return CSVデータ List<List<String>>
      */
-    fun loadMapData(resource: Resources, resourceId: Int): MutableList<List<String>> {
-        val map: MutableList<List<String>> = mutableListOf()
+    fun loadCsvData(resourceId: Int): List<List<String>> {
+        val csvData: MutableList<List<String>> = mutableListOf()
         try {
-            val inputStream: InputStream = resource.openRawResource(resourceId)
+            val inputStream: InputStream = context.resources.openRawResource(resourceId)
             val reader = BufferedReader(InputStreamReader(inputStream))
             reader.forEachLine {
-                map.add(it.split(","))
+                csvData.add(it.split(","))
             }
             inputStream.close()
         } catch (e: IOException) {
         }
-        return map
+        return csvData
     }
 }

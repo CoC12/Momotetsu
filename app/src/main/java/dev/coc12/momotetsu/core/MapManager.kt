@@ -5,7 +5,7 @@ import dev.coc12.momotetsu.R
 import dev.coc12.momotetsu.service.Loader
 
 class MapManager(context: Context) {
-    private var mapData = Loader().loadMapData(context.resources, R.raw.map)
+    private val mapData = Loader(context).loadCsvData(R.raw.map)
 
     /**
      * マップの幅を取得する。
