@@ -64,7 +64,7 @@ class Loader(private val context: Context) {
     /**
      * CSVファイルを読み込む。
      *
-     * @param resourceId マップのリソースID
+     * @param resourceId CSVのリソースID
      * @return CSVデータ List<List<String>>
      */
     fun loadCsvData(resourceId: Int): List<List<String>> {
