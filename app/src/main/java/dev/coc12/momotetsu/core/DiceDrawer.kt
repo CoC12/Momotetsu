@@ -17,7 +17,7 @@ class DiceDrawer @JvmOverloads constructor(
     private val srcRect = Rect(0, 0, diceBmpList[0].width, diceBmpList[0].height)
 
     private val paint = Paint()
-    private var diceRect = RectF()
+    private val diceRect = RectF()
     private var diceList: MutableList<Int> = mutableListOf()
 
     override fun onDraw(canvas: Canvas) {
@@ -32,7 +32,7 @@ class DiceDrawer @JvmOverloads constructor(
         )
         for (num in diceList) {
             // TODO 複数サイコロの描画位置調整
-            canvas.drawBitmap(diceBmpList[num], srcRect, diceRect, paint)
+            canvas.drawBitmap(diceBmpList[num - 1], srcRect, diceRect, paint)
         }
     }
 
