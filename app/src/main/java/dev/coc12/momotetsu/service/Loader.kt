@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.res.AssetManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import io.sentry.Sentry
 import java.io.BufferedReader
 import java.io.IOException
 import java.io.InputStream
@@ -26,7 +27,7 @@ class Loader(private val context: Context) {
             try {
                 inputStream = assetManager.open(srcPath)
             } catch (e: IOException) {
-                e.printStackTrace()
+                Sentry.captureException(e)
             }
             assetList.add(BitmapFactory.decodeStream(inputStream))
         }
@@ -77,6 +78,7 @@ class Loader(private val context: Context) {
             }
             inputStream.close()
         } catch (e: IOException) {
+            Sentry.captureException(e)
         }
         return csvData
     }
