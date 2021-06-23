@@ -15,7 +15,8 @@ class HeaderDrawer @JvmOverloads constructor(
     private var zoomRate = 3f
     private var height = 100 * zoomRate
     private var margin = 10 * zoomRate
-    private var round = 15 * zoomRate
+    private var bgRound = 15 * zoomRate
+    private var remainingRound = 5 * zoomRate
     private var borderVertical = 5 * zoomRate
     private var borderHorizontal = 20 * zoomRate
     private var dividerWidth = 2 * zoomRate
@@ -31,6 +32,7 @@ class HeaderDrawer @JvmOverloads constructor(
         width - margin - borderHorizontal,
         height + margin - borderVertical
     )
+    private val remainingMoveCountRect = RectF()
     private val dividerPaint = Paint()
     private val textPaint = Paint()
 
@@ -41,15 +43,16 @@ class HeaderDrawer @JvmOverloads constructor(
     private var distance: Int = 0
     private var year: Int = 0
     private var month: Int = 0
+    private var remainingMoveCount: Int = 0
 
     override fun onDraw(canvas: Canvas) {
         borderPaint.color = ContextCompat.getColor(context, playerColor)
         borderRect.right = width - margin
-        canvas.drawRoundRect(borderRect, round, round, borderPaint)
+        canvas.drawRoundRect(borderRect, bgRound, bgRound, borderPaint)
 
         bgPaint.color = Color.WHITE
         bgRect.right = width - margin - borderHorizontal
-        canvas.drawRoundRect(bgRect, round, round, bgPaint)
+        canvas.drawRoundRect(bgRect, bgRound, bgRound, bgPaint)
 
         dividerPaint.strokeWidth = dividerWidth
         dividerPaint.color = Color.BLACK
@@ -86,11 +89,27 @@ class HeaderDrawer @JvmOverloads constructor(
             height + margin - borderVertical - textMargin,
             textPaint
         )
+
+        if (remainingMoveCount > 0) {
+            remainingMoveCountRect.set(
+                (width / 2).toFloat(),
+                height + borderVertical + textMargin,
+                width - margin - borderHorizontal,
+                height * 3 / 2 + textMargin,
+            )
+            canvas.drawRoundRect(remainingMoveCountRect, remainingRound, remainingRound, bgPaint)
+            canvas.drawText(
+                "あと $remainingMoveCount マス",
+                width / 2 + textMargin,
+                height * 3 / 2,
+                textPaint
+            )
+        }
     }
 
     fun set(
         playerColor: Int, playerName: String, playerMoney: Int, destination: String, distance: Int,
-        year: Int, month: Int
+        year: Int, month: Int, remainingMoveCount: Int
     ) {
         this.playerColor = playerColor
         this.playerName = playerName
@@ -99,5 +118,6 @@ class HeaderDrawer @JvmOverloads constructor(
         this.distance = distance
         this.year = year
         this.month = month
+        this.remainingMoveCount = remainingMoveCount
     }
 }

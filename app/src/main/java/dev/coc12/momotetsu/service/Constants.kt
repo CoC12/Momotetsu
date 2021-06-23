@@ -28,5 +28,28 @@ class Constants {
             "dice5.png",
             "dice6.png",
         )
+        const val SQUARE_NONE = "-1"
+        const val SQUARE_SEA = "0"
+        const val SQUARE_LAND = "1"
+        const val SQUARE_STATION = "2"
+        const val SQUARE_BLUE = "3"
+        const val SQUARE_RED = "4"
+        const val SQUARE_CARD = "5"
+        const val SQUARE_ROAD_VERTICAL = "6"
+        const val SQUARE_ROAD_HORIZONTAL = "7"
+        val LAND_AND_SEA_SQUARES: List<String> = listOf(
+            SQUARE_SEA,
+            SQUARE_LAND,
+        )
+        val EFFECT_SQUARES: List<String> = listOf(
+            SQUARE_STATION,
+            SQUARE_BLUE,
+            SQUARE_RED,
+            SQUARE_CARD,
+        )
+        val ROAD_SQUARES: List<String> = listOf(
+            SQUARE_ROAD_VERTICAL,
+            SQUARE_ROAD_HORIZONTAL,
+        )
     }
 }
