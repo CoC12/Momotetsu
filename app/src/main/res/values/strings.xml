@@ -4,4 +4,8 @@
     <string name="dice_button_label">さいころ</string>
     <string name="back_button_label">もどる</string>
     <string name="move_button_label">移動</string>
+    <string name="arrow_right">→</string>
+    <string name="arrow_downward">↓</string>
+    <string name="arrow_left">←</string>
+    <string name="arrow_upward">↑</string>
 </resources>

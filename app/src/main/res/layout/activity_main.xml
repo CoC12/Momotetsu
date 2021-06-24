@@ -30,7 +30,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_toEndOf="@+id/arrow_left"
-            android:text="↑"
+            android:text="@string/arrow_upward"
             tools:ignore="ButtonStyle" />
 
         <Button
@@ -38,7 +38,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@+id/arrow_upward"
-            android:text="←"
+            android:text="@string/arrow_left"
             tools:ignore="ButtonStyle" />
 
         <Button
@@ -47,7 +47,7 @@
             android:layout_height="wrap_content"
             android:layout_below="@+id/arrow_left"
             android:layout_toEndOf="@id/arrow_left"
-            android:text="↓"
+            android:text="@string/arrow_downward"
             tools:ignore="ButtonStyle" />
 
         <Button
@@ -56,7 +56,7 @@
             android:layout_height="wrap_content"
             android:layout_above="@+id/arrow_downward"
             android:layout_toEndOf="@id/arrow_downward"
-            android:text="→"
+            android:text="@string/arrow_right"
             tools:ignore="ButtonStyle" />
 
     </RelativeLayout>
