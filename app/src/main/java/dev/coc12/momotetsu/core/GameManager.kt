@@ -15,7 +15,6 @@ import dev.coc12.momotetsu.room.Player
 import dev.coc12.momotetsu.service.Constants
 import dev.coc12.momotetsu.service.DiagonalScrollView
 
-
 class GameManager(
     context: Activity,
     private val containerView: RelativeLayout,
@@ -34,12 +33,19 @@ class GameManager(
 
     // フッターボタン
     private val diceButton: Button = context.findViewById(R.id.dice)
+    private val backButton: Button = context.findViewById(R.id.back)
     private val moveButton: Button = context.findViewById(R.id.move)
+    private val dPad: RelativeLayout = context.findViewById(R.id.d_pad)
+    private val arrowUpward: Button = context.findViewById(R.id.arrow_upward)
+    private val arrowDownward: Button = context.findViewById(R.id.arrow_downward)
+    private val arrowRight: Button = context.findViewById(R.id.arrow_right)
+    private val arrowLeft: Button = context.findViewById(R.id.arrow_left)
 
     private val playerList = PlayerList()
 
     private var game = Game()
     private var moveCount: Int = 0
+    private val moveStack = ArrayDeque<Pair<Int, Int>>()
     private var selectedPosX: Int = 0
     private var selectedPosY: Int = 0
 
@@ -63,11 +69,30 @@ class GameManager(
             clickMap(event)
             true
         }
+        // さいころボタン
         diceButton.setOnClickListener {
             clickDice()
         }
+        // 移動ボタン
         moveButton.setOnClickListener {
             clickMove()
+        }
+        // もどるボタン
+        backButton.setOnClickListener {
+            clickBack()
+        }
+        // 矢印キー
+        arrowUpward.setOnClickListener {
+            clickArrow(0, -1)
+        }
+        arrowDownward.setOnClickListener {
+            clickArrow(0, +1)
+        }
+        arrowRight.setOnClickListener {
+            clickArrow(+1, 0)
+        }
+        arrowLeft.setOnClickListener {
+            clickArrow(-1, 0)
         }
     }
 
@@ -113,7 +138,8 @@ class GameManager(
             "稚内",
             49,
             game.getYearMonth().first,
-            game.getYearMonth().second
+            game.getYearMonth().second,
+            moveCount - moveStack.size,
         )
         headerDrawer.invalidate()
     }
@@ -132,6 +158,9 @@ class GameManager(
         Handler(Looper.getMainLooper()).postDelayed({
             diceDrawer.roll(0)
             moveButton.visibility = View.VISIBLE
+            backButton.visibility = View.VISIBLE
+            dPad.visibility = View.VISIBLE
+            updateHeader()
         }, 1000)
     }
 
@@ -144,11 +173,76 @@ class GameManager(
      * 3. 1s後に次のターンに変更
      */
     private fun clickMove() {
+        val squareInfo = mapDrawer.mapManager.getSquareInfo(selectedPosX, selectedPosY)
+        if (!Constants.EFFECT_SQUARES.contains(squareInfo)) {
+            return
+        }
+
         moveButton.visibility = View.GONE
+        backButton.visibility = View.GONE
+        dPad.visibility = View.GONE
         movePlayer(playerList.getTurnPlayer(), selectedPosX, selectedPosY)
         Handler(Looper.getMainLooper()).postDelayed({
             changeTurn()
         }, 1000)
+    }
+
+    /**
+     * 「もどる」のクリックイベント処理
+     *
+     * 1. 最後の移動履歴の場所へ移動
+     * 2. 移動履歴の最後を削除
+     */
+    private fun clickBack() {
+        val lastPosition = moveStack.lastOrNull() ?: return
+        moveStack.removeLast()
+        movePlayer(playerList.getTurnPlayer(), lastPosition.first, lastPosition.second)
+    }
+
+    /**
+     * 「矢印」のクリックイベント処理
+     *
+     * 1. 矢印方向に駅がない場合は何もせず終了
+     * 2. 最後の移動履歴と移動先が同じ場合はclickBack()をコールして終了
+     * 3. 移動履歴を残す
+     * 4. 矢印方向にプレイヤーを移動する
+     * 5. サイコロの出目と移動履歴の大きさが等しくない場合はここで終了
+     * 6. 移動用UIを非表示
+     * 7. 1s後に次のターンに変更
+     */
+    private fun clickArrow(directionX: Int, directionY: Int) {
+        val currentPosX = playerList.getTurnPlayer().positionX
+        val currentPosY = playerList.getTurnPlayer().positionY
+        val landAndSeaSquares = Constants.LAND_AND_SEA_SQUARES
+        val roadSquares = Constants.ROAD_SQUARES
+
+        for (i in 1..mapDrawer.mapManager.getMaxSize()) {
+            val targetPosX = currentPosX + directionX * i
+            val targetPosY = currentPosY + directionY * i
+            val squareInfo = mapDrawer.mapManager.getSquareInfo(targetPosX, targetPosY)
+
+            if (landAndSeaSquares.contains(squareInfo)) {
+                return
+            }
+            if (roadSquares.contains(squareInfo)) {
+                continue
+            }
+            if (moveStack.lastOrNull() == Pair(targetPosX, targetPosY)) {
+                clickBack()
+                return
+            }
+            moveStack.add(Pair(currentPosX, currentPosY))
+            movePlayer(playerList.getTurnPlayer(), targetPosX, targetPosY)
+            if (moveCount == moveStack.size) {
+                moveButton.visibility = View.GONE
+                backButton.visibility = View.GONE
+                dPad.visibility = View.GONE
+                Handler(Looper.getMainLooper()).postDelayed({
+                    changeTurn()
+                }, 1000)
+            }
+            return
+        }
     }
 
     /**
@@ -172,14 +266,22 @@ class GameManager(
      * @param posY Int 移動後のY座標
      */
     private fun movePlayer(player: Player, posX: Int, posY: Int) {
+        val currentPosX = player.positionX
+        val currentPosY = player.positionY
         player.positionX = posX
         player.positionY = posY
+        player.direction = when {
+            currentPosX == posX -> if (posY < currentPosY) 2 else 4
+            currentPosY == posY -> if (posX < currentPosX) 1 else 3
+            else -> mapDrawer.mapManager.getSquareDirections(posX, posY).first()
+        }
 
         mapDrawer.invalidate()
         mapDrawer.setScroll(
             posX,
             posY,
         )
+        updateHeader()
     }
 
     /**
@@ -188,9 +290,10 @@ class GameManager(
      * 1. PlayerList::changeTurn() をコール
      * 2. PlayerListからturnIndexを取得
      * 3. 選択位置をリセットする
-     * 4. ヘッダー描画を更新
-     * 5. 行動選択用UIを表示する
-     * 6. 次のプレイヤーの位置までスクロール
+     * 4. サイコロの出目、移動履歴をリセット
+     * 5. ヘッダー描画を更新
+     * 6. 行動選択用UIを表示する
+     * 7. 次のプレイヤーの位置までスクロール
      */
     private fun changeTurn() {
         if (playerList.changeTurn()) {
@@ -199,6 +302,8 @@ class GameManager(
         game.turnIndex = playerList.turnIndex
         selectedPosX = 0
         selectedPosY = 0
+        moveCount = 0
+        moveStack.clear()
 
         updateHeader()
         diceButton.visibility = View.VISIBLE

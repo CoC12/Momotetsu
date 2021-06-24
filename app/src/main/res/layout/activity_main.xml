@@ -18,7 +18,51 @@
             android:layout_height="match_parent" />
     </dev.coc12.momotetsu.service.DiagonalScrollView>
 
+    <RelativeLayout
+        android:id="@+id/d_pad"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/footer"
+        android:visibility="gone">
+
+        <Button
+            android:id="@+id/arrow_upward"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toEndOf="@+id/arrow_left"
+            android:text="@string/arrow_upward"
+            tools:ignore="ButtonStyle" />
+
+        <Button
+            android:id="@+id/arrow_left"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/arrow_upward"
+            android:text="@string/arrow_left"
+            tools:ignore="ButtonStyle" />
+
+        <Button
+            android:id="@+id/arrow_downward"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/arrow_left"
+            android:layout_toEndOf="@id/arrow_left"
+            android:text="@string/arrow_downward"
+            tools:ignore="ButtonStyle" />
+
+        <Button
+            android:id="@+id/arrow_right"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_above="@+id/arrow_downward"
+            android:layout_toEndOf="@id/arrow_downward"
+            android:text="@string/arrow_right"
+            tools:ignore="ButtonStyle" />
+
+    </RelativeLayout>
+
     <LinearLayout
+        android:id="@+id/footer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
@@ -29,6 +73,14 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/dice_button_label"
+            tools:ignore="ButtonStyle" />
+
+        <Button
+            android:id="@+id/back"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/back_button_label"
+            android:visibility="gone"
             tools:ignore="ButtonStyle" />
 
         <Button

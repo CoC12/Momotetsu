@@ -19,7 +19,7 @@ class MapDrawer @JvmOverloads constructor(
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0,
 ) : View(context, attrs, defStyleAttr) {
-    private val mapManager: MapManager = MapManager(context)
+    val mapManager: MapManager = MapManager(context)
     private val chipSize = 32
     private val dp = resources.displayMetrics.density
     private val mapChip = Loader(context).loadChipSet(R.drawable.chipset, chipSize)
