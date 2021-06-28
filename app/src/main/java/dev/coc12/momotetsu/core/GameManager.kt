@@ -30,11 +30,13 @@ class GameManager(
     private val mapDrawer = MapDrawer(context, diagonalScrollView, scrollView)
     private val headerDrawer = HeaderDrawer(context)
     private val diceDrawer = DiceDrawer(context)
+    private val drumRollDrawer = DrumRollDrawer(context)
 
     // フッターボタン
     private val diceButton: Button = context.findViewById(R.id.dice)
     private val backButton: Button = context.findViewById(R.id.back)
     private val moveButton: Button = context.findViewById(R.id.move)
+    private val stopDrumrollButton: Button = context.findViewById(R.id.stop_drumroll)
     private val dPad: RelativeLayout = context.findViewById(R.id.d_pad)
     private val arrowUpward: Button = context.findViewById(R.id.arrow_upward)
     private val arrowDownward: Button = context.findViewById(R.id.arrow_downward)
@@ -48,6 +50,7 @@ class GameManager(
     private val moveStack = ArrayDeque<Pair<Int, Int>>()
     private var selectedPosX: Int = 0
     private var selectedPosY: Int = 0
+    private var stopDrumrollCallback: (Int) -> Unit = {}
 
     init {
         // ゲームの取得もしくは新規作成
@@ -80,6 +83,10 @@ class GameManager(
         // もどるボタン
         backButton.setOnClickListener {
             clickBack()
+        }
+        // ストップボタン
+        stopDrumrollButton.setOnClickListener {
+            stopDrumroll()
         }
         // 矢印キー
         arrowUpward.setOnClickListener {
@@ -116,6 +123,7 @@ class GameManager(
         mapDrawer.playerList = playerList
         containerView.addView(headerDrawer)
         containerView.addView(diceDrawer)
+        containerView.addView(drumRollDrawer)
         scrollView.addView(mapDrawer)
 
         containerView.post {
@@ -208,7 +216,7 @@ class GameManager(
      * 4. 矢印方向にプレイヤーを移動する
      * 5. サイコロの出目と移動履歴の大きさが等しくない場合はここで終了
      * 6. 移動用UIを非表示
-     * 7. 1s後に次のターンに変更
+     * 7. マス目の効果を発動する
      */
     private fun clickArrow(directionX: Int, directionY: Int) {
         val currentPosX = playerList.getTurnPlayer().positionX
@@ -237,9 +245,7 @@ class GameManager(
                 moveButton.visibility = View.GONE
                 backButton.visibility = View.GONE
                 dPad.visibility = View.GONE
-                Handler(Looper.getMainLooper()).postDelayed({
-                    changeTurn()
-                }, 1000)
+                activateSquareEffect()
             }
             return
         }
@@ -285,6 +291,61 @@ class GameManager(
     }
 
     /**
+     * ドラムロールを止める。
+     *
+     * 1. ドラムロールストップボタンを非表示
+     * 2. ドラムロール停止時のコールバック関数を実行
+     */
+    private fun stopDrumroll() {
+        stopDrumrollButton.visibility = View.GONE
+        stopDrumrollCallback(drumRollDrawer.stopRoll())
+    }
+
+    /**
+     * マス目の効果を発動する。
+     */
+    private fun activateSquareEffect() {
+        val squareInfo = mapDrawer.mapManager.getSquareInfo(
+            playerList.getTurnPlayer().positionX,
+            playerList.getTurnPlayer().positionY
+        )
+
+        // TODO 駅、カードマスに止まった場合の処理
+        if (Constants.MONEY_SQUARES.contains(squareInfo)) {
+            val moneyList = getMoneyList(squareInfo)
+            drumRollDrawer.showDialog(
+                moneyList.map { "$it 万円" },
+                when (squareInfo) {
+                    Constants.SQUARE_BLUE -> {
+                        R.color.dialog_color_blue
+                    }
+                    Constants.SQUARE_RED -> {
+                        R.color.dialog_color_red
+
+                    }
+                    else -> {
+                        R.color.dialog_color_blue
+                    }
+                }
+            )
+            stopDrumrollButton.visibility = View.VISIBLE
+
+            stopDrumrollCallback = { index ->
+                playerList.getTurnPlayer().money += moneyList[index]
+                updateHeader()
+                Handler(Looper.getMainLooper()).postDelayed({
+                    drumRollDrawer.hideDialog()
+                    changeTurn()
+                }, 2000)
+            }
+            return
+        }
+        Handler(Looper.getMainLooper()).postDelayed({
+            changeTurn()
+        }, 2000)
+    }
+
+    /**
      * 次のターンにする。
      *
      * 1. PlayerList::changeTurn() をコール
@@ -311,5 +372,25 @@ class GameManager(
             playerList.getTurnPlayer().positionX,
             playerList.getTurnPlayer().positionY,
         )
+    }
+
+    /**
+     * 青マス・赤マスに止まったときの金額のリストを取得します。
+     *
+     * TODO 年目、月などを考慮したリストを作る。
+     */
+    private fun getMoneyList(squareInfo: String): List<Int> {
+        val moneyList: MutableList<Int> = mutableListOf()
+        val baseMoney = 1000
+
+        for (i in (0..10)) {
+            val money = (baseMoney * 3 + (0..baseMoney * 4).random()) / 5
+            if (squareInfo == Constants.SQUARE_BLUE) {
+                moneyList.add(money)
+            } else if (squareInfo == Constants.SQUARE_RED) {
+                moneyList.add(-money)
+            }
+        }
+        return moneyList
     }
 }

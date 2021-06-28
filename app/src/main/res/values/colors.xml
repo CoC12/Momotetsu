@@ -12,4 +12,7 @@
     <color name="player_color_blue">#ff344feb</color>
     <color name="player_color_green">#ff34eb34</color>
     <color name="player_color_yellow">#ffebd934</color>
+
+    <color name="dialog_color_red">#ffeb4034</color>
+    <color name="dialog_color_blue">#ff344feb</color>
 </resources>

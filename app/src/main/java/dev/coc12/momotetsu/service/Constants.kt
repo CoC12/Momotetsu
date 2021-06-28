@@ -51,5 +51,9 @@ class Constants {
             SQUARE_ROAD_VERTICAL,
             SQUARE_ROAD_HORIZONTAL,
         )
+        val MONEY_SQUARES: List<String> = listOf(
+            SQUARE_BLUE,
+            SQUARE_RED,
+        )
     }
 }

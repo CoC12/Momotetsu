@@ -90,5 +90,13 @@
             android:text="@string/move_button_label"
             android:visibility="gone"
             tools:ignore="ButtonStyle" />
+
+        <Button
+            android:id="@+id/stop_drumroll"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/stop_drumroll_button_label"
+            android:visibility="gone"
+            tools:ignore="ButtonStyle" />
     </LinearLayout>
 </RelativeLayout>
