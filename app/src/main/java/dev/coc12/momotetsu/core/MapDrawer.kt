@@ -2,12 +2,15 @@ package dev.coc12.momotetsu.core
 
 import android.content.Context
 import android.graphics.Canvas
+import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Rect
 import android.util.AttributeSet
 import android.view.View
 import android.widget.ScrollView
 import dev.coc12.momotetsu.R
+import dev.coc12.momotetsu.room.DatabaseSingleton
+import dev.coc12.momotetsu.room.Station
 import dev.coc12.momotetsu.service.Constants
 import dev.coc12.momotetsu.service.DiagonalScrollView
 import dev.coc12.momotetsu.service.Loader
@@ -25,9 +28,15 @@ class MapDrawer @JvmOverloads constructor(
     private val mapChip = Loader(context).loadChipSet(R.drawable.chipset, chipSize)
     private val playerBmpList = Loader(context).loadImageAssets(Constants.ASSET_PLAYER_CARS)
     private val srcRect = Rect(0, 0, playerBmpList[0].width, playerBmpList[0].height)
+    private val stations = getStations()
 
     var playerList: PlayerList? = null
-    private var paint: Paint = Paint()
+    private val paint = Paint()
+    private val textPaint = Paint()
+    private val placeNameBgPaint = Paint()
+    private val placeNameBgRect = Rect()
+    private val placeNameBorderPaint = Paint()
+    private val placeNameBorderRect = Rect()
     private var zoomRate = 1.5
     private var realChipSize: Int = 0
     private var screenWidth: Int = 0
@@ -46,6 +55,7 @@ class MapDrawer @JvmOverloads constructor(
 
     override fun onDraw(canvas: Canvas) {
         drawMap(canvas)
+        drawPlaceName(canvas)
         drawPlayer(canvas)
     }
 
@@ -89,6 +99,63 @@ class MapDrawer @JvmOverloads constructor(
         }
     }
 
+    /**
+     * 地名を描画する。
+     *
+     * @param canvas Canvas
+     */
+    private fun drawPlaceName(canvas: Canvas) {
+        val textSize = (realChipSize * 5 / 12).toFloat()
+        val placeNameBorderWidth = realChipSize / 20
+        textPaint.textSize = textSize
+        placeNameBorderPaint.color = Color.DKGRAY
+        placeNameBgPaint.color = Color.WHITE
+
+        for (station in stations) {
+            val bgLeft = (station.positionX + 0.9) * realChipSize
+            val bgTop = (station.positionY + 1.1) * realChipSize
+            val bgRight =
+                (station.positionX + 1.1) * realChipSize + textPaint.measureText(station.name)
+            val bgBottom = (station.positionY + 1.3) * realChipSize + textSize
+
+            placeNameBorderRect.set(
+                bgLeft.toInt(),
+                bgTop.toInt(),
+                bgRight.toInt(),
+                bgBottom.toInt(),
+            )
+            canvas.drawRect(placeNameBorderRect, placeNameBorderPaint)
+            placeNameBgRect.set(
+                bgLeft.toInt() + placeNameBorderWidth,
+                bgTop.toInt() + placeNameBorderWidth,
+                bgRight.toInt() - placeNameBorderWidth,
+                bgBottom.toInt() - placeNameBorderWidth,
+            )
+            canvas.drawRect(placeNameBgRect, placeNameBgPaint)
+            canvas.drawText(
+                station.name!!,
+                ((station.positionX + 1) * realChipSize).toFloat(),
+                ((station.positionY + 1.1) * realChipSize + textSize).toFloat(),
+                textPaint
+            )
+        }
+    }
+
+    /**
+     * DBから駅情報を取得する。
+     *
+     * @return stationList List<Station>
+     */
+    private fun getStations(): List<Station> {
+        val stationDao = DatabaseSingleton().getInstance(context).stationDao()
+        var stationList: List<Station> = listOf()
+        val loadDatabase = Thread {
+            stationList = stationDao.getAll()
+        }
+        loadDatabase.start()
+        loadDatabase.join()
+        return stationList
+    }
 
     /**
      * マップを指定した位置までスクロールする。

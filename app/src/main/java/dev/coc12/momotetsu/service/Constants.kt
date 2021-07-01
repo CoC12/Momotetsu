@@ -5,8 +5,8 @@ import dev.coc12.momotetsu.R
 class Constants {
     companion object {
         const val DATABASE_NAME = "momotetsu_db"
-        const val DEFAULT_POSITION_X = 25
-        const val DEFAULT_POSITION_Y = 16
+        const val DEFAULT_POSITION_X = 77
+        const val DEFAULT_POSITION_Y = 105
 
         val PLAYER_COLORS: List<Int> = listOf(
             R.color.player_color_red,
@@ -37,6 +37,8 @@ class Constants {
         const val SQUARE_CARD = "5"
         const val SQUARE_ROAD_VERTICAL = "6"
         const val SQUARE_ROAD_HORIZONTAL = "7"
+        const val SQUARE_SEAWAY_VERTICAL = "8"
+        const val SQUARE_SEAWAY_HORIZONTAL = "9"
         val LAND_AND_SEA_SQUARES: List<String> = listOf(
             SQUARE_SEA,
             SQUARE_LAND,
@@ -50,10 +52,13 @@ class Constants {
         val ROAD_SQUARES: List<String> = listOf(
             SQUARE_ROAD_VERTICAL,
             SQUARE_ROAD_HORIZONTAL,
+            SQUARE_SEAWAY_VERTICAL,
+            SQUARE_SEAWAY_HORIZONTAL,
         )
         val MONEY_SQUARES: List<String> = listOf(
             SQUARE_BLUE,
             SQUARE_RED,
         )
+        const val JSON_KEY_STATION = "station"
     }
 }

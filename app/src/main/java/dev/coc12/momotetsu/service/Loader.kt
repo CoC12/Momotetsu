@@ -5,6 +5,7 @@ import android.content.res.AssetManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import io.sentry.Sentry
+import org.json.JSONObject
 import java.io.BufferedReader
 import java.io.IOException
 import java.io.InputStream
@@ -81,5 +82,24 @@ class Loader(private val context: Context) {
             Sentry.captureException(e)
         }
         return csvData
+    }
+
+    /**
+     * Jsonファイルを読み込む。
+     *
+     * @param resourceId JsonのリソースID
+     * @return Jsonファイル JSONObject
+     */
+    fun loadJsonData(resourceId: Int): JSONObject {
+        var jsonString = "{}"
+        try {
+            val inputStream: InputStream = context.resources.openRawResource(resourceId)
+            val bufferedReader = BufferedReader(InputStreamReader(inputStream))
+            jsonString = bufferedReader.readText()
+            inputStream.close()
+        } catch (e: IOException) {
+            Sentry.captureException(e)
+        }
+        return JSONObject(jsonString)
     }
 }
