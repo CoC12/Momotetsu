@@ -108,7 +108,8 @@ class MapDrawer @JvmOverloads constructor(
         val textSize = (realChipSize * 5 / 12).toFloat()
         val placeNameBorderWidth = realChipSize / 20
         textPaint.textSize = textSize
-
+        placeNameBorderPaint.color = Color.DKGRAY
+        placeNameBgPaint.color = Color.WHITE
 
         for (station in stations) {
             val bgLeft = (station.positionX + 0.9) * realChipSize
@@ -117,7 +118,6 @@ class MapDrawer @JvmOverloads constructor(
                 (station.positionX + 1.1) * realChipSize + textPaint.measureText(station.name)
             val bgBottom = (station.positionY + 1.3) * realChipSize + textSize
 
-            placeNameBorderPaint.color = Color.DKGRAY
             placeNameBorderRect.set(
                 bgLeft.toInt(),
                 bgTop.toInt(),
@@ -125,7 +125,6 @@ class MapDrawer @JvmOverloads constructor(
                 bgBottom.toInt(),
             )
             canvas.drawRect(placeNameBorderRect, placeNameBorderPaint)
-            placeNameBgPaint.color = Color.WHITE
             placeNameBgRect.set(
                 bgLeft.toInt() + placeNameBorderWidth,
                 bgTop.toInt() + placeNameBorderWidth,
@@ -145,7 +144,7 @@ class MapDrawer @JvmOverloads constructor(
     /**
      * DBから駅情報を取得する。
      *
-     * return stationList List<Station>
+     * @return stationList List<Station>
      */
     private fun getStations(): List<Station> {
         val stationDao = DatabaseSingleton().getInstance(context).stationDao()

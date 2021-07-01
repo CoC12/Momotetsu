@@ -20,6 +20,8 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        // TODO 駅情報が存在しないときにのみ読み込むようにする。
         loadStations()
 
         val containerView: RelativeLayout = findViewById(R.id.view_container)
