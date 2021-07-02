@@ -8,11 +8,10 @@ import dev.coc12.momotetsu.R
 import dev.coc12.momotetsu.core.GameManager
 import dev.coc12.momotetsu.room.DatabaseSingleton
 import dev.coc12.momotetsu.room.Player
+import dev.coc12.momotetsu.room.RealEstate
 import dev.coc12.momotetsu.room.Station
-import dev.coc12.momotetsu.service.Constants
 import dev.coc12.momotetsu.service.DiagonalScrollView
 import dev.coc12.momotetsu.service.Loader
-import org.json.JSONArray
 
 class MainActivity : AppCompatActivity() {
     private val context = this
@@ -23,6 +22,7 @@ class MainActivity : AppCompatActivity() {
 
         // TODO 駅情報が存在しないときにのみ読み込むようにする。
         loadStations()
+        loadRealEstate()
 
         val containerView: RelativeLayout = findViewById(R.id.view_container)
         val diagonalScrollView: DiagonalScrollView = findViewById(R.id.diagonal_scroll_view)
@@ -41,9 +41,8 @@ class MainActivity : AppCompatActivity() {
      */
     private fun loadStations() {
         val stationList: MutableList<Station> = mutableListOf()
-        val data = Loader(context).loadJsonData(R.raw.station_data)
+        val stations = Loader(context).loadJsonArrayData(R.raw.station_data)
 
-        val stations: JSONArray = data.getJSONArray(Constants.JSON_KEY_STATION)
         for (i in 0 until stations.length()) {
             val station = Station(stations.getJSONObject(i))
             stationList.add(station)
@@ -51,6 +50,25 @@ class MainActivity : AppCompatActivity() {
         val saveDatabase = Thread {
             val stationDao = DatabaseSingleton().getInstance(context).stationDao()
             stationDao.updateOrCreate(stationList)
+        }
+        saveDatabase.start()
+        saveDatabase.join()
+    }
+
+    /**
+     * 物件情報を読み込む。
+     */
+    private fun loadRealEstate() {
+        val realEstateList: MutableList<RealEstate> = mutableListOf()
+        val realEstates = Loader(context).loadJsonArrayData(R.raw.real_estate_data)
+
+        for (i in 0 until realEstates.length()) {
+            val realEstate = RealEstate(realEstates.getJSONObject(i))
+            realEstateList.add(realEstate)
+        }
+        val saveDatabase = Thread {
+            val realEstateDao = DatabaseSingleton().getInstance(context).realEstateDao()
+            realEstateDao.updateOrCreate(realEstateList)
         }
         saveDatabase.start()
         saveDatabase.join()

@@ -5,7 +5,7 @@ import android.content.res.AssetManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import io.sentry.Sentry
-import org.json.JSONObject
+import org.json.JSONArray
 import java.io.BufferedReader
 import java.io.IOException
 import java.io.InputStream
@@ -88,9 +88,9 @@ class Loader(private val context: Context) {
      * Jsonファイルを読み込む。
      *
      * @param resourceId JsonのリソースID
-     * @return Jsonファイル JSONObject
+     * @return Jsonファイル JSONArray
      */
-    fun loadJsonData(resourceId: Int): JSONObject {
+    fun loadJsonArrayData(resourceId: Int): JSONArray {
         var jsonString = "{}"
         try {
             val inputStream: InputStream = context.resources.openRawResource(resourceId)
@@ -100,6 +100,6 @@ class Loader(private val context: Context) {
         } catch (e: IOException) {
             Sentry.captureException(e)
         }
-        return JSONObject(jsonString)
+        return JSONArray(jsonString)
     }
 }
