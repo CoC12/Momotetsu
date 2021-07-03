@@ -1,0 +1,58 @@
+[
+    {
+        "name": "いしかりバーガー屋",
+        "code": "ishikari_1",
+        "price": 1000,
+        "rate": 80,
+        "type": 0,
+        "stationCode": "ishikari"
+    },
+    {
+        "name": "いしかりバーガー屋",
+        "code": "ishikari_2",
+        "price": 1000,
+        "rate": 80,
+        "type": 0,
+        "stationCode": "ishikari"
+    },
+    {
+        "name": "小麦畑",
+        "code": "ishikari_3",
+        "price": 8000,
+        "rate": 10,
+        "type": 1,
+        "stationCode": "ishikari"
+    },
+    {
+        "name": "小麦畑",
+        "code": "ishikari_4",
+        "price": 8000,
+        "rate": 10,
+        "type": 1,
+        "stationCode": "ishikari"
+    },
+    {
+        "name": "小麦畑",
+        "code": "ishikari_5",
+        "price": 8000,
+        "rate": 10,
+        "type": 1,
+        "stationCode": "ishikari"
+    },
+    {
+        "name": "石狩鍋屋",
+        "code": "ishikari_6",
+        "price": 20000,
+        "rate": 20,
+        "type": 0,
+        "stationCode": "ishikari"
+    },
+    {
+        "name": "いくら加工工場",
+        "code": "ishikari_7",
+        "price": 100000,
+        "rate": 5,
+        "type": 2,
+        "stationCode": "ishikari"
+    }
+]

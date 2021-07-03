@@ -59,6 +59,5 @@ class Constants {
             SQUARE_BLUE,
             SQUARE_RED,
         )
-        const val JSON_KEY_STATION = "station"
     }
 }

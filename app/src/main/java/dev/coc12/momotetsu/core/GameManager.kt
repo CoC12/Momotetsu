@@ -12,6 +12,7 @@ import dev.coc12.momotetsu.R
 import dev.coc12.momotetsu.room.DatabaseSingleton
 import dev.coc12.momotetsu.room.Game
 import dev.coc12.momotetsu.room.Player
+import dev.coc12.momotetsu.room.RealEstate
 import dev.coc12.momotetsu.service.Constants
 import dev.coc12.momotetsu.service.DiagonalScrollView
 
@@ -25,6 +26,7 @@ class GameManager(
     // データアクセスオブジェクト
     private val gameDao = DatabaseSingleton().getInstance(context).gameDao()
     private val playerDao = DatabaseSingleton().getInstance(context).playerDao()
+    private val stationDao = DatabaseSingleton().getInstance(context).stationDao()
 
     // 画面描画クラス
     private val mapDrawer = MapDrawer(context, diagonalScrollView, scrollView)
@@ -305,12 +307,24 @@ class GameManager(
      * マス目の効果を発動する。
      */
     private fun activateSquareEffect() {
+        val posX = playerList.getTurnPlayer().positionX
+        val posY = playerList.getTurnPlayer().positionY
         val squareInfo = mapDrawer.mapManager.getSquareInfo(
             playerList.getTurnPlayer().positionX,
             playerList.getTurnPlayer().positionY
         )
 
-        // TODO 駅、カードマスに止まった場合の処理
+        // TODO カードマスに止まった場合の処理
+        if (squareInfo == Constants.SQUARE_STATION) {
+            val realEstates = getRealEstates(posX, posY)
+            if (realEstates.isEmpty()) {
+                Handler(Looper.getMainLooper()).postDelayed({
+                    changeTurn()
+                }, 2000)
+                return
+            }
+            // TODO 物件購入ダイアログを表示させる
+        }
         if (Constants.MONEY_SQUARES.contains(squareInfo)) {
             val moneyList = getMoneyList(squareInfo)
             drumRollDrawer.showDialog(
@@ -392,5 +406,22 @@ class GameManager(
             }
         }
         return moneyList
+    }
+
+    /**
+     * 該当物件駅の物件一覧を取得する。
+     *
+     * @param posX Int 物件駅のX座標
+     * @param posY Int 物件駅のY座標
+     * @return 物件一覧 List<RealEstate>
+     */
+    private fun getRealEstates(posX: Int, posY: Int): List<RealEstate> {
+        var realEstates: List<RealEstate> = listOf()
+        val loadRealEstate = Thread {
+            realEstates = stationDao.getStationWithRealEstates(posX, posY).realEstate
+        }
+        loadRealEstate.start()
+        loadRealEstate.join()
+        return realEstates
     }
 }
