@@ -1,5 +1,93 @@
 [
     {
+        "name": "札幌ラーメン屋",
+        "code": "sapporo_1",
+        "price": 1000,
+        "rate": 100,
+        "type": 0,
+        "stationCode": "sapporo"
+    },
+    {
+        "name": "札幌ラーメン屋",
+        "code": "sapporo_2",
+        "price": 1000,
+        "rate": 100,
+        "type": 0,
+        "stationCode": "sapporo"
+    },
+    {
+        "name": "スープカレー屋",
+        "code": "sapporo_3",
+        "price": 1000,
+        "rate": 80,
+        "type": 0,
+        "stationCode": "sapporo"
+    },
+    {
+        "name": "スープカレー屋",
+        "code": "sapporo_4",
+        "price": 1000,
+        "rate": 80,
+        "type": 0,
+        "stationCode": "sapporo"
+    },
+    {
+        "name": "ジンギスカン屋",
+        "code": "sapporo_5",
+        "price": 30000,
+        "rate": 10,
+        "type": 0,
+        "stationCode": "sapporo"
+    },
+    {
+        "name": "日本酒酒造",
+        "code": "sapporo_6",
+        "price": 50000,
+        "rate": 5,
+        "type": 0,
+        "stationCode": "sapporo"
+    },
+    {
+        "name": "日本酒ミュージアム",
+        "code": "sapporo_7",
+        "price": 50000,
+        "rate": 2,
+        "type": 5,
+        "stationCode": "sapporo"
+    },
+    {
+        "name": "定山渓温泉宿",
+        "code": "sapporo_8",
+        "price": 200000,
+        "rate": 2,
+        "type": 5,
+        "stationCode": "sapporo"
+    },
+    {
+        "name": "定山渓温泉宿",
+        "code": "sapporo_9",
+        "price": 200000,
+        "rate": 2,
+        "type": 5,
+        "stationCode": "sapporo"
+    },
+    {
+        "name": "スキージャンブ競技場",
+        "code": "sapporo_10",
+        "price": 550000,
+        "rate": 2,
+        "type": 5,
+        "stationCode": "sapporo"
+    },
+    {
+        "name": "サッポロドーム",
+        "code": "sapporo_11",
+        "price": 2500000,
+        "rate": 4,
+        "type": 5,
+        "stationCode": "sapporo"
+    },
+    {
         "name": "いしかりバーガー屋",
         "code": "ishikari_1",
         "price": 1000,

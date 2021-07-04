@@ -33,12 +33,15 @@ class GameManager(
     private val headerDrawer = HeaderDrawer(context)
     private val diceDrawer = DiceDrawer(context)
     private val drumRollDrawer = DrumRollDrawer(context)
+    private val listDrawer = ListDrawer(context)
 
     // フッターボタン
     private val diceButton: Button = context.findViewById(R.id.dice)
     private val backButton: Button = context.findViewById(R.id.back)
     private val moveButton: Button = context.findViewById(R.id.move)
     private val stopDrumrollButton: Button = context.findViewById(R.id.stop_drumroll)
+    private val purchaseButton: Button = context.findViewById(R.id.purchase)
+    private val finishButton: Button = context.findViewById(R.id.finish)
     private val dPad: RelativeLayout = context.findViewById(R.id.d_pad)
     private val arrowUpward: Button = context.findViewById(R.id.arrow_upward)
     private val arrowDownward: Button = context.findViewById(R.id.arrow_downward)
@@ -53,6 +56,8 @@ class GameManager(
     private var selectedPosX: Int = 0
     private var selectedPosY: Int = 0
     private var stopDrumrollCallback: (Int) -> Unit = {}
+    private var finishButtonCallback: () -> Unit = {}
+    private var purchaseButtonCallback: () -> Unit = {}
 
     init {
         // ゲームの取得もしくは新規作成
@@ -72,7 +77,12 @@ class GameManager(
         mapDrawer.setOnTouchListener { _, event ->
             mapDrawer.performClick()
             clickMap(event)
-            true
+            false
+        }
+        listDrawer.setOnTouchListener { _, event ->
+            listDrawer.performClick()
+            listDrawer.toggleItemSelected(event.x, event.y)
+            false
         }
         // さいころボタン
         diceButton.setOnClickListener {
@@ -89,6 +99,14 @@ class GameManager(
         // ストップボタン
         stopDrumrollButton.setOnClickListener {
             stopDrumroll()
+        }
+        // 買うボタン
+        purchaseButton.setOnClickListener {
+            clickPurchase()
+        }
+        // やめるボタン
+        finishButton.setOnClickListener {
+            clickFinish()
         }
         // 矢印キー
         arrowUpward.setOnClickListener {
@@ -126,6 +144,7 @@ class GameManager(
         containerView.addView(headerDrawer)
         containerView.addView(diceDrawer)
         containerView.addView(drumRollDrawer)
+        containerView.addView(listDrawer)
         scrollView.addView(mapDrawer)
 
         containerView.post {
@@ -256,8 +275,8 @@ class GameManager(
     /**
      * マップのクリックイベント処理
      */
-    private fun clickMap(event: MotionEvent?) {
-        if (event == null || event.action != MotionEvent.ACTION_UP) {
+    private fun clickMap(event: MotionEvent) {
+        if (event.action != MotionEvent.ACTION_UP) {
             return
         }
 
@@ -304,6 +323,21 @@ class GameManager(
     }
 
     /**
+     * 買うボタン押下時の処理。
+     */
+    private fun clickPurchase() {
+        purchaseButtonCallback()
+    }
+
+    /**
+     * やめるボタン押下時の処理。
+     */
+    private fun clickFinish() {
+        finishButton.visibility = View.GONE
+        finishButtonCallback()
+    }
+
+    /**
      * マス目の効果を発動する。
      */
     private fun activateSquareEffect() {
@@ -323,7 +357,25 @@ class GameManager(
                 }, 2000)
                 return
             }
-            // TODO 物件購入ダイアログを表示させる
+            listDrawer.showDialog(
+                realEstates.map { "${it.name} ${it.price} 万円 ${it.rate}%" },
+                R.color.dialog_color_gray
+            )
+            purchaseButton.visibility = View.VISIBLE
+            finishButton.visibility = View.VISIBLE
+
+            finishButtonCallback = {
+                purchaseButton.visibility = View.GONE
+                listDrawer.hideDialog()
+                Handler(Looper.getMainLooper()).postDelayed({
+                    changeTurn()
+                }, 1000)
+            }
+            purchaseButtonCallback = {
+                // TODO 物件購入処理
+                listDrawer.init()
+            }
+            return
         }
         if (Constants.MONEY_SQUARES.contains(squareInfo)) {
             val moneyList = getMoneyList(squareInfo)

@@ -15,4 +15,5 @@
 
     <color name="dialog_color_red">#ffeb4034</color>
     <color name="dialog_color_blue">#ff344feb</color>
+    <color name="dialog_color_gray">#5A5855</color>
 </resources>
