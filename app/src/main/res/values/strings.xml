@@ -5,6 +5,8 @@
     <string name="back_button_label">もどる</string>
     <string name="move_button_label">移動</string>
     <string name="stop_drumroll_button_label">ストップ</string>
+    <string name="purchase_button_label">買う</string>
+    <string name="finish_button_label">おわる</string>
     <string name="arrow_right">→</string>
     <string name="arrow_downward">↓</string>
     <string name="arrow_left">←</string>

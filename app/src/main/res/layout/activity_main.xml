@@ -98,5 +98,21 @@
             android:text="@string/stop_drumroll_button_label"
             android:visibility="gone"
             tools:ignore="ButtonStyle" />
+
+        <Button
+            android:id="@+id/purchase"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/purchase_button_label"
+            android:visibility="gone"
+            tools:ignore="ButtonStyle" />
+
+        <Button
+            android:id="@+id/finish"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/finish_button_label"
+            android:visibility="gone"
+            tools:ignore="ButtonStyle" />
     </LinearLayout>
 </RelativeLayout>
