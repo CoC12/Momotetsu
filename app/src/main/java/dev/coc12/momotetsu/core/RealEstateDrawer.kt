@@ -7,7 +7,7 @@ import android.view.View
 import androidx.core.content.ContextCompat
 import dev.coc12.momotetsu.R
 
-class ListDrawer @JvmOverloads constructor(
+class RealEstateDrawer @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0,
@@ -24,7 +24,7 @@ class ListDrawer @JvmOverloads constructor(
     private val itemSelectedPaint = Paint()
 
     private var showDialog = false
-    private var itemList: List<ListItem> = listOf()
+    private var itemList: List<RealEstateListItem> = listOf()
     private var colorId: Int = R.color.player_color_red
 
     override fun onDraw(canvas: Canvas) {
@@ -59,6 +59,18 @@ class ListDrawer @JvmOverloads constructor(
                 (height) / 2 - (itemList.size - index * 2 - 1) * textSize,
                 textPaint
             )
+            canvas.drawText(
+                "${item.price} 万円",
+                (width * 4 / 7).toFloat(),
+                (height) / 2 - (itemList.size - index * 2 - 1) * textSize,
+                textPaint
+            )
+            canvas.drawText(
+                "${item.rate}%",
+                width * 37 / 40 - textPaint.measureText("${item.rate}%"),
+                (height) / 2 - (itemList.size - index * 2 - 1) * textSize,
+                textPaint
+            )
         }
 
         borderPaint.style = Paint.Style.STROKE
@@ -73,7 +85,7 @@ class ListDrawer @JvmOverloads constructor(
      * @param itemList List<String> リストの項目
      * @param colorId Int 枠の色
      */
-    fun showDialog(itemList: List<ListItem>, colorId: Int) {
+    fun showDialog(itemList: List<RealEstateListItem>, colorId: Int) {
         showDialog = true
         this.itemList = itemList
         this.colorId = colorId

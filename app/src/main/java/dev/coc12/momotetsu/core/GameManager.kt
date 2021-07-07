@@ -34,6 +34,7 @@ class GameManager(
     private val diceDrawer = DiceDrawer(context)
     private val drumRollDrawer = DrumRollDrawer(context)
     private val listDrawer = ListDrawer(context)
+    private val realEstateDrawer = RealEstateDrawer(context)
 
     // フッターボタン
     private val diceButton: Button = context.findViewById(R.id.dice)
@@ -82,6 +83,11 @@ class GameManager(
         listDrawer.setOnTouchListener { _, event ->
             listDrawer.performClick()
             listDrawer.toggleItemSelected(event.x, event.y)
+            false
+        }
+        realEstateDrawer.setOnTouchListener { _, event ->
+            realEstateDrawer.performClick()
+            realEstateDrawer.toggleItemSelected(event.x, event.y)
             false
         }
         // さいころボタン
@@ -145,6 +151,7 @@ class GameManager(
         containerView.addView(diceDrawer)
         containerView.addView(drumRollDrawer)
         containerView.addView(listDrawer)
+        containerView.addView(realEstateDrawer)
         scrollView.addView(mapDrawer)
 
         containerView.post {
@@ -357,8 +364,14 @@ class GameManager(
                 }, 2000)
                 return
             }
-            listDrawer.showDialog(
-                realEstates.map { "${it.name} ${it.price} 万円 ${it.rate}%" },
+            realEstateDrawer.showDialog(
+                realEstates.map {
+                    RealEstateListItem(
+                        it.name!!,
+                        it.price,
+                        it.rate,
+                    )
+                },
                 R.color.dialog_color_gray
             )
             purchaseButton.visibility = View.VISIBLE
@@ -366,14 +379,14 @@ class GameManager(
 
             finishButtonCallback = {
                 purchaseButton.visibility = View.GONE
-                listDrawer.hideDialog()
+                realEstateDrawer.hideDialog()
                 Handler(Looper.getMainLooper()).postDelayed({
                     changeTurn()
                 }, 1000)
             }
             purchaseButtonCallback = {
                 // TODO 物件購入処理
-                listDrawer.init()
+                realEstateDrawer.init()
             }
             return
         }
