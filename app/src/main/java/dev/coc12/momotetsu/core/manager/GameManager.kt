@@ -1,4 +1,4 @@
-package dev.coc12.momotetsu.core
+package dev.coc12.momotetsu.core.manager
 
 import android.app.Activity
 import android.os.Handler
@@ -9,6 +9,9 @@ import android.widget.Button
 import android.widget.RelativeLayout
 import android.widget.ScrollView
 import dev.coc12.momotetsu.R
+import dev.coc12.momotetsu.core.PlayerList
+import dev.coc12.momotetsu.core.RealEstateListItem
+import dev.coc12.momotetsu.core.drawer.*
 import dev.coc12.momotetsu.room.DatabaseSingleton
 import dev.coc12.momotetsu.room.Game
 import dev.coc12.momotetsu.room.Player

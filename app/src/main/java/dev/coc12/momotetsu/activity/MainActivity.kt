@@ -5,7 +5,7 @@ import android.widget.RelativeLayout
 import android.widget.ScrollView
 import androidx.appcompat.app.AppCompatActivity
 import dev.coc12.momotetsu.R
-import dev.coc12.momotetsu.core.GameManager
+import dev.coc12.momotetsu.core.manager.GameManager
 import dev.coc12.momotetsu.room.DatabaseSingleton
 import dev.coc12.momotetsu.room.Player
 import dev.coc12.momotetsu.room.RealEstate
