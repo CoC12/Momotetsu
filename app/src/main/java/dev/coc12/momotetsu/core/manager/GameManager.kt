@@ -356,6 +356,7 @@ class GameManager(
         // TODO カードマスに止まった場合の処理
         if (squareInfo == Constants.SQUARE_STATION) {
             activateStationEffect(posX, posY)
+            return
         }
         if (Constants.MONEY_SQUARES.contains(squareInfo)) {
             val moneyList = getMoneyList(squareInfo)
