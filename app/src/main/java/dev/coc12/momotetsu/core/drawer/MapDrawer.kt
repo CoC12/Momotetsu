@@ -1,4 +1,4 @@
-package dev.coc12.momotetsu.core
+package dev.coc12.momotetsu.core.drawer
 
 import android.content.Context
 import android.graphics.Canvas
@@ -9,6 +9,8 @@ import android.util.AttributeSet
 import android.view.View
 import android.widget.ScrollView
 import dev.coc12.momotetsu.R
+import dev.coc12.momotetsu.core.manager.MapManager
+import dev.coc12.momotetsu.core.PlayerList
 import dev.coc12.momotetsu.room.DatabaseSingleton
 import dev.coc12.momotetsu.room.Station
 import dev.coc12.momotetsu.service.Constants

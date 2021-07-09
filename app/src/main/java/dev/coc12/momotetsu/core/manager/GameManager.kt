@@ -1,4 +1,4 @@
-package dev.coc12.momotetsu.core
+package dev.coc12.momotetsu.core.manager
 
 import android.app.Activity
 import android.os.Handler
@@ -9,10 +9,10 @@ import android.widget.Button
 import android.widget.RelativeLayout
 import android.widget.ScrollView
 import dev.coc12.momotetsu.R
-import dev.coc12.momotetsu.room.DatabaseSingleton
-import dev.coc12.momotetsu.room.Game
-import dev.coc12.momotetsu.room.Player
-import dev.coc12.momotetsu.room.RealEstate
+import dev.coc12.momotetsu.core.PlayerList
+import dev.coc12.momotetsu.core.RealEstateListItem
+import dev.coc12.momotetsu.core.drawer.*
+import dev.coc12.momotetsu.room.*
 import dev.coc12.momotetsu.service.Constants
 import dev.coc12.momotetsu.service.DiagonalScrollView
 
@@ -27,6 +27,7 @@ class GameManager(
     private val gameDao = DatabaseSingleton().getInstance(context).gameDao()
     private val playerDao = DatabaseSingleton().getInstance(context).playerDao()
     private val stationDao = DatabaseSingleton().getInstance(context).stationDao()
+    private val realEstateDao = DatabaseSingleton().getInstance(context).realEstateDao()
 
     // 画面描画クラス
     private val mapDrawer = MapDrawer(context, diagonalScrollView, scrollView)
@@ -34,6 +35,7 @@ class GameManager(
     private val diceDrawer = DiceDrawer(context)
     private val drumRollDrawer = DrumRollDrawer(context)
     private val listDrawer = ListDrawer(context)
+    private val realEstateDrawer = RealEstateDrawer(context)
 
     // フッターボタン
     private val diceButton: Button = context.findViewById(R.id.dice)
@@ -57,7 +59,7 @@ class GameManager(
     private var selectedPosY: Int = 0
     private var stopDrumrollCallback: (Int) -> Unit = {}
     private var finishButtonCallback: () -> Unit = {}
-    private var purchaseButtonCallback: () -> Unit = {}
+    private var purchaseButtonCallback: (List<Int>) -> Unit = {}
 
     init {
         // ゲームの取得もしくは新規作成
@@ -82,6 +84,11 @@ class GameManager(
         listDrawer.setOnTouchListener { _, event ->
             listDrawer.performClick()
             listDrawer.toggleItemSelected(event.x, event.y)
+            false
+        }
+        realEstateDrawer.setOnTouchListener { _, event ->
+            realEstateDrawer.performClick()
+            realEstateDrawer.toggleItemSelected(event.x, event.y)
             false
         }
         // さいころボタン
@@ -145,6 +152,7 @@ class GameManager(
         containerView.addView(diceDrawer)
         containerView.addView(drumRollDrawer)
         containerView.addView(listDrawer)
+        containerView.addView(realEstateDrawer)
         scrollView.addView(mapDrawer)
 
         containerView.post {
@@ -326,7 +334,7 @@ class GameManager(
      * 買うボタン押下時の処理。
      */
     private fun clickPurchase() {
-        purchaseButtonCallback()
+        purchaseButtonCallback(realEstateDrawer.getSelectedItem())
     }
 
     /**
@@ -343,38 +351,11 @@ class GameManager(
     private fun activateSquareEffect() {
         val posX = playerList.getTurnPlayer().positionX
         val posY = playerList.getTurnPlayer().positionY
-        val squareInfo = mapDrawer.mapManager.getSquareInfo(
-            playerList.getTurnPlayer().positionX,
-            playerList.getTurnPlayer().positionY
-        )
+        val squareInfo = mapDrawer.mapManager.getSquareInfo(posX, posY)
 
         // TODO カードマスに止まった場合の処理
         if (squareInfo == Constants.SQUARE_STATION) {
-            val realEstates = getRealEstates(posX, posY)
-            if (realEstates.isEmpty()) {
-                Handler(Looper.getMainLooper()).postDelayed({
-                    changeTurn()
-                }, 2000)
-                return
-            }
-            listDrawer.showDialog(
-                realEstates.map { "${it.name} ${it.price} 万円 ${it.rate}%" },
-                R.color.dialog_color_gray
-            )
-            purchaseButton.visibility = View.VISIBLE
-            finishButton.visibility = View.VISIBLE
-
-            finishButtonCallback = {
-                purchaseButton.visibility = View.GONE
-                listDrawer.hideDialog()
-                Handler(Looper.getMainLooper()).postDelayed({
-                    changeTurn()
-                }, 1000)
-            }
-            purchaseButtonCallback = {
-                // TODO 物件購入処理
-                listDrawer.init()
-            }
+            activateStationEffect(posX, posY)
             return
         }
         if (Constants.MONEY_SQUARES.contains(squareInfo)) {
@@ -441,6 +422,49 @@ class GameManager(
     }
 
     /**
+     * 駅に止まったときの効果発動する
+     *
+     * @param posX Int 物件駅のX座標
+     * @param posY Int 物件駅のY座標
+     */
+    private fun activateStationEffect(posX: Int, posY: Int) {
+        val station = getStation(posX, posY)
+        if (station == null) {
+            Handler(Looper.getMainLooper()).postDelayed({
+                changeTurn()
+            }, 2000)
+            return
+        }
+
+        val realEstates = getRealEstates(station.code!!)
+        if (realEstates.isEmpty()) {
+            Handler(Looper.getMainLooper()).postDelayed({
+                changeTurn()
+            }, 2000)
+            return
+        }
+
+        realEstateDrawer.showDialog(buildRealEstateListItem(realEstates))
+        purchaseButton.visibility = View.VISIBLE
+        finishButton.visibility = View.VISIBLE
+
+        finishButtonCallback = {
+            purchaseButton.visibility = View.GONE
+            realEstateDrawer.hideDialog()
+            Handler(Looper.getMainLooper()).postDelayed({
+                changeTurn()
+            }, 1000)
+        }
+        purchaseButtonCallback = {
+            purchaseRealEstate(it.map { index ->
+                realEstates[index].realEstate
+            })
+            realEstateDrawer.init(buildRealEstateListItem(getRealEstates(station.code!!)))
+        }
+        return
+    }
+
+    /**
      * 青マス・赤マスに止まったときの金額のリストを取得します。
      *
      * TODO 年目、月などを考慮したリストを作る。
@@ -461,16 +485,77 @@ class GameManager(
     }
 
     /**
-     * 該当物件駅の物件一覧を取得する。
+     * 物件購入処理
+     *
+     * @param selectedRealEstates List<RealEstate> 購入対象の物件のリスト
+     */
+    private fun purchaseRealEstate(selectedRealEstates: List<RealEstate>) {
+        val turnPlayerId = playerList.getTurnPlayer().playerId
+        val playerRealEstateList = selectedRealEstates.map {
+            PlayerRealEstateCrossRef(
+                it.code!!,
+                turnPlayerId,
+            )
+        }
+
+        val purchaseRealEstate = Thread {
+            realEstateDao.updateOrCreatePlayerRealEstate(playerRealEstateList)
+        }
+        purchaseRealEstate.start()
+        purchaseRealEstate.join()
+    }
+
+    /**
+     * 物件ダイアログの項目のリストを生成する
+     *
+     * @param realEstates List<RealEstateWithPlayers>
+     * @return 物件ダイアログの項目リスト List<RealEstateListItem>
+     */
+    private fun buildRealEstateListItem(realEstates: List<RealEstateWithPlayers>): List<RealEstateListItem> {
+        return realEstates.map { realEstate ->
+            RealEstateListItem(
+                realEstate.realEstate.name!!,
+                realEstate.realEstate.price,
+                realEstate.realEstate.rate,
+                if (realEstate.players.isNotEmpty()) Constants.PLAYER_COLORS[playerList.getPlayerIndex(
+                    realEstate.players[0]
+                )] else null,
+            )
+        }
+    }
+
+    /**
+     * 駅情報を取得する。
      *
      * @param posX Int 物件駅のX座標
      * @param posY Int 物件駅のY座標
-     * @return 物件一覧 List<RealEstate>
+     * @return 駅情報 Station
      */
-    private fun getRealEstates(posX: Int, posY: Int): List<RealEstate> {
-        var realEstates: List<RealEstate> = listOf()
+    private fun getStation(posX: Int, posY: Int): Station? {
+        var station: Station? = null
+        val loadStation = Thread {
+            station = stationDao.getStation(posX, posY)
+        }
+        loadStation.start()
+        loadStation.join()
+        return if (station == null) null else station!!
+    }
+
+    /**
+     * 該当物件駅の物件一覧を取得する。
+     *
+     * @param stationCode String 駅コード
+     * @return 物件一覧 List<RealEstateWithPlayers>
+     */
+    private fun getRealEstates(stationCode: String): List<RealEstateWithPlayers> {
+        var realEstates: List<RealEstateWithPlayers> = listOf()
         val loadRealEstate = Thread {
-            realEstates = stationDao.getStationWithRealEstates(posX, posY).realEstate
+            realEstates = realEstateDao.getRealEstateWithPlayersFilterByStationCode(stationCode)
+            realEstates.map { realEstate ->
+                realEstate.players = realEstate.players.filter {
+                    playerList.getPlayerIds().contains(it.playerId)
+                }
+            }
         }
         loadRealEstate.start()
         loadRealEstate.join()

@@ -1,4 +1,4 @@
-package dev.coc12.momotetsu.core
+package dev.coc12.momotetsu.core.manager
 
 import android.content.Context
 import dev.coc12.momotetsu.R

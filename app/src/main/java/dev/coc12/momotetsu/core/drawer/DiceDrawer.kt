@@ -1,4 +1,4 @@
-package dev.coc12.momotetsu.core
+package dev.coc12.momotetsu.core.drawer
 
 import android.content.Context
 import android.graphics.*
