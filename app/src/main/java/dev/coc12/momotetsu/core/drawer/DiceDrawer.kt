@@ -43,11 +43,18 @@ class DiceDrawer @JvmOverloads constructor(
      * @return 出目の合計
      */
     fun roll(diceCount: Int): Int {
-        diceList = mutableListOf()
-        for (i in (1..diceCount)) {
-            diceList.add((1..6).random())
-        }
+        diceList = (1..diceCount).map {
+            (1..6).random()
+        } as MutableList<Int>
         invalidate()
         return diceList.sum()
+    }
+
+    /**
+     * サイコロを非表示にする
+     */
+    fun hideDice() {
+        diceList.clear()
+        invalidate()
     }
 }
