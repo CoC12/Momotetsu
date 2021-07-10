@@ -5,6 +5,7 @@ import android.graphics.*
 import android.util.AttributeSet
 import android.view.View
 import androidx.core.content.ContextCompat
+import dev.coc12.momotetsu.core.Toolkit
 import dev.coc12.momotetsu.service.Constants
 
 class HeaderDrawer @JvmOverloads constructor(
@@ -72,7 +73,7 @@ class HeaderDrawer @JvmOverloads constructor(
             textPaint
         )
         canvas.drawText(
-            "$playerMoney 万円",
+            Toolkit.getFormattedPrice(playerMoney),
             (width / 2).toFloat(),
             height / 2 + margin - textMargin,
             textPaint

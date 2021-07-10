@@ -11,6 +11,7 @@ import android.widget.ScrollView
 import dev.coc12.momotetsu.R
 import dev.coc12.momotetsu.core.PlayerList
 import dev.coc12.momotetsu.core.RealEstateListItem
+import dev.coc12.momotetsu.core.Toolkit
 import dev.coc12.momotetsu.core.drawer.*
 import dev.coc12.momotetsu.room.*
 import dev.coc12.momotetsu.service.Constants
@@ -361,7 +362,7 @@ class GameManager(
         if (Constants.MONEY_SQUARES.contains(squareInfo)) {
             val moneyList = getMoneyList(squareInfo)
             drumRollDrawer.showDialog(
-                moneyList.map { "$it 万円" },
+                moneyList.map { Toolkit.getFormattedPrice(it) },
                 when (squareInfo) {
                     Constants.SQUARE_BLUE -> {
                         R.color.dialog_color_blue
@@ -457,7 +458,9 @@ class GameManager(
         }
         purchaseButtonCallback = {
             purchaseRealEstate(it.map { index ->
-                realEstates[index].realEstate
+                realEstates[index]
+            }.filter { realEstate ->
+                realEstate.players.isEmpty()
             })
             realEstateDrawer.init(buildRealEstateListItem(getRealEstates(station.code!!)))
         }
@@ -487,22 +490,39 @@ class GameManager(
     /**
      * 物件購入処理
      *
-     * @param selectedRealEstates List<RealEstate> 購入対象の物件のリスト
+     * 1. 購入対象物件の総額を取得
+     * 2. 購入対象物件の総額がプレイヤーの持ち金を超えていたら終了
+     * 3. 購入情報をDBへ保存
+     * 4. プレイヤーの持ち金を購入物件の総額分差し引く
+     * 5. ヘッダー描画を更新
+     *
+     * @param selectedRealEstates List<RealEstateWithPlayers> 購入対象の物件のリスト
      */
-    private fun purchaseRealEstate(selectedRealEstates: List<RealEstate>) {
-        val turnPlayerId = playerList.getTurnPlayer().playerId
-        val playerRealEstateList = selectedRealEstates.map {
-            PlayerRealEstateCrossRef(
-                it.code!!,
-                turnPlayerId,
-            )
+    private fun purchaseRealEstate(selectedRealEstates: List<RealEstateWithPlayers>) {
+        val turnPlayer = playerList.getTurnPlayer()
+
+        // 購入資金が足りない場合は購入処理をしない
+        val totalPrice = selectedRealEstates.sumOf {
+            it.realEstate.price
+        }
+        if (turnPlayer.money < totalPrice) {
+            return
         }
 
+        // 購入確定処理
         val purchaseRealEstate = Thread {
-            realEstateDao.updateOrCreatePlayerRealEstate(playerRealEstateList)
+            realEstateDao.updateOrCreatePlayerRealEstate(selectedRealEstates.map {
+                PlayerRealEstateCrossRef(
+                    it.realEstate.code!!,
+                    turnPlayer.playerId,
+                )
+            })
         }
         purchaseRealEstate.start()
         purchaseRealEstate.join()
+
+        turnPlayer.money -= totalPrice
+        updateHeader()
     }
 
     /**

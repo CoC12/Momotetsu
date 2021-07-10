@@ -7,6 +7,7 @@ import android.view.View
 import androidx.core.content.ContextCompat
 import dev.coc12.momotetsu.R
 import dev.coc12.momotetsu.core.RealEstateListItem
+import dev.coc12.momotetsu.core.Toolkit
 
 class RealEstateDrawer @JvmOverloads constructor(
     context: Context,
@@ -66,9 +67,10 @@ class RealEstateDrawer @JvmOverloads constructor(
                 (height) / 2 - (itemList.size - index * 2 - 1) * textSize,
                 textPaint
             )
+            val price = Toolkit.getFormattedPrice(item.price)
             canvas.drawText(
-                "${item.price} 万円",
-                (width * 4 / 7).toFloat(),
+                price,
+                width * 3 / 4 - textPaint.measureText(price),
                 (height) / 2 - (itemList.size - index * 2 - 1) * textSize,
                 textPaint
             )
