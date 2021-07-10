@@ -4,8 +4,6 @@ import android.app.Activity
 import android.os.Handler
 import android.os.Looper
 import android.view.MotionEvent
-import android.view.View
-import android.widget.Button
 import android.widget.RelativeLayout
 import android.widget.ScrollView
 import dev.coc12.momotetsu.R
@@ -38,20 +36,8 @@ class GameManager(
     private val listDrawer = ListDrawer(context)
     private val realEstateDrawer = RealEstateDrawer(context)
 
-    // フッターボタン
-    private val diceButton: Button = context.findViewById(R.id.dice)
-    private val backButton: Button = context.findViewById(R.id.back)
-    private val moveButton: Button = context.findViewById(R.id.move)
-    private val stopDrumrollButton: Button = context.findViewById(R.id.stop_drumroll)
-    private val purchaseButton: Button = context.findViewById(R.id.purchase)
-    private val finishButton: Button = context.findViewById(R.id.finish)
-    private val dPad: RelativeLayout = context.findViewById(R.id.d_pad)
-    private val arrowUpward: Button = context.findViewById(R.id.arrow_upward)
-    private val arrowDownward: Button = context.findViewById(R.id.arrow_downward)
-    private val arrowRight: Button = context.findViewById(R.id.arrow_right)
-    private val arrowLeft: Button = context.findViewById(R.id.arrow_left)
-
     private val playerList = PlayerList()
+    private val interfaceManager: InterfaceManager = InterfaceManager(context)
 
     private var game = Game()
     private var moveCount: Int = 0
@@ -92,43 +78,18 @@ class GameManager(
             realEstateDrawer.toggleItemSelected(event.x, event.y)
             false
         }
-        // さいころボタン
-        diceButton.setOnClickListener {
-            clickDice()
-        }
-        // 移動ボタン
-        moveButton.setOnClickListener {
-            clickMove()
-        }
-        // もどるボタン
-        backButton.setOnClickListener {
-            clickBack()
-        }
-        // ストップボタン
-        stopDrumrollButton.setOnClickListener {
-            stopDrumroll()
-        }
-        // 買うボタン
-        purchaseButton.setOnClickListener {
-            clickPurchase()
-        }
-        // やめるボタン
-        finishButton.setOnClickListener {
-            clickFinish()
-        }
-        // 矢印キー
-        arrowUpward.setOnClickListener {
-            clickArrow(0, -1)
-        }
-        arrowDownward.setOnClickListener {
-            clickArrow(0, +1)
-        }
-        arrowRight.setOnClickListener {
-            clickArrow(+1, 0)
-        }
-        arrowLeft.setOnClickListener {
-            clickArrow(-1, 0)
-        }
+        interfaceManager.setOnClickListeners(
+            { clickDice() },
+            { clickMove() },
+            { clickBack() },
+            { stopDrumroll() },
+            { clickPurchase() },
+            { clickFinish() },
+            { clickArrow(0, -1) },
+            { clickArrow(0, +1) },
+            { clickArrow(+1, 0) },
+            { clickArrow(-1, 0) },
+        )
     }
 
     /**
@@ -190,14 +151,12 @@ class GameManager(
      * 3. 移動用UIを表示する
      */
     private fun clickDice() {
-        diceButton.visibility = View.GONE
+        interfaceManager.hideDefaultButtons()
         moveCount = diceDrawer.roll(1)
 
         Handler(Looper.getMainLooper()).postDelayed({
-            diceDrawer.roll(0)
-            moveButton.visibility = View.VISIBLE
-            backButton.visibility = View.VISIBLE
-            dPad.visibility = View.VISIBLE
+            diceDrawer.hideDice()
+            interfaceManager.showMovementButtons()
             updateHeader()
         }, 1000)
     }
@@ -216,9 +175,7 @@ class GameManager(
             return
         }
 
-        moveButton.visibility = View.GONE
-        backButton.visibility = View.GONE
-        dPad.visibility = View.GONE
+        interfaceManager.hideMovementButtons()
         movePlayer(playerList.getTurnPlayer(), selectedPosX, selectedPosY)
         Handler(Looper.getMainLooper()).postDelayed({
             changeTurn()
@@ -272,9 +229,7 @@ class GameManager(
             moveStack.add(Pair(currentPosX, currentPosY))
             movePlayer(playerList.getTurnPlayer(), targetPosX, targetPosY)
             if (moveCount == moveStack.size) {
-                moveButton.visibility = View.GONE
-                backButton.visibility = View.GONE
-                dPad.visibility = View.GONE
+                interfaceManager.hideMovementButtons()
                 activateSquareEffect()
             }
             return
@@ -327,7 +282,7 @@ class GameManager(
      * 2. ドラムロール停止時のコールバック関数を実行
      */
     private fun stopDrumroll() {
-        stopDrumrollButton.visibility = View.GONE
+        interfaceManager.hideDrumrollButtons()
         stopDrumrollCallback(drumRollDrawer.stopRoll())
     }
 
@@ -342,7 +297,6 @@ class GameManager(
      * やめるボタン押下時の処理。
      */
     private fun clickFinish() {
-        finishButton.visibility = View.GONE
         finishButtonCallback()
     }
 
@@ -376,7 +330,7 @@ class GameManager(
                     }
                 }
             )
-            stopDrumrollButton.visibility = View.VISIBLE
+            interfaceManager.showDrumrollButtons()
 
             stopDrumrollCallback = { index ->
                 playerList.getTurnPlayer().money += moneyList[index]
@@ -415,7 +369,7 @@ class GameManager(
         moveStack.clear()
 
         updateHeader()
-        diceButton.visibility = View.VISIBLE
+        interfaceManager.showDefaultButtons()
         mapDrawer.setScroll(
             playerList.getTurnPlayer().positionX,
             playerList.getTurnPlayer().positionY,
@@ -446,11 +400,10 @@ class GameManager(
         }
 
         realEstateDrawer.showDialog(buildRealEstateListItem(realEstates))
-        purchaseButton.visibility = View.VISIBLE
-        finishButton.visibility = View.VISIBLE
+        interfaceManager.showRealEstateButtons()
 
         finishButtonCallback = {
-            purchaseButton.visibility = View.GONE
+            interfaceManager.hideRealEstateButtons()
             realEstateDrawer.hideDialog()
             Handler(Looper.getMainLooper()).postDelayed({
                 changeTurn()
