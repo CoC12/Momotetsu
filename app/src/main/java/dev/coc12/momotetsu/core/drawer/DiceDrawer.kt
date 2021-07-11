@@ -12,27 +12,29 @@ class DiceDrawer @JvmOverloads constructor(
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0,
 ) : View(context, attrs, defStyleAttr) {
-
     private val diceBmpList = Loader(context).loadImageAssets(Constants.ASSET_DICES)
+    private var diceList: List<Int> = listOf()
     private val srcRect = Rect(0, 0, diceBmpList[0].width, diceBmpList[0].height)
-
-    private val paint = Paint()
     private val diceRect = RectF()
-    private var diceList: MutableList<Int> = mutableListOf()
+    private val paint = Paint()
 
     override fun onDraw(canvas: Canvas) {
         if (diceList.isEmpty()) {
             return
         }
-        diceRect.set(
-            (width / 2).toFloat(),
-            (height / 2).toFloat(),
-            (width / 2 + width / 10).toFloat(),
-            (height / 2 + width / 10).toFloat(),
-        )
-        for (num in diceList) {
-            // TODO 複数サイコロの描画位置調整
-            canvas.drawBitmap(diceBmpList[num - 1], srcRect, diceRect, paint)
+
+        val diceWidth = (width / 8).toFloat()
+        val diceMargin = (width / 50).toFloat()
+        for ((indexY, chunkedDices) in diceList.chunked(4).withIndex()) {
+            for ((indexX, dice) in chunkedDices.withIndex()) {
+                diceRect.set(
+                    width / 2 + diceWidth * (indexX - chunkedDices.size / 2),
+                    height / 2 + diceWidth * (indexY - 1),
+                    width / 2 + diceWidth * (indexX + 1 - chunkedDices.size / 2) - diceMargin,
+                    height / 2 + diceWidth * indexY - diceMargin,
+                )
+                canvas.drawBitmap(diceBmpList[dice - 1], srcRect, diceRect, paint)
+            }
         }
     }
 
@@ -45,7 +47,7 @@ class DiceDrawer @JvmOverloads constructor(
     fun roll(diceCount: Int): Int {
         diceList = (1..diceCount).map {
             (1..6).random()
-        } as MutableList<Int>
+        }
         invalidate()
         return diceList.sum()
     }
@@ -54,7 +56,7 @@ class DiceDrawer @JvmOverloads constructor(
      * サイコロを非表示にする
      */
     fun hideDice() {
-        diceList.clear()
+        diceList = listOf()
         invalidate()
     }
 }

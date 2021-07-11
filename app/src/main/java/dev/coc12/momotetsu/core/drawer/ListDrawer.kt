@@ -14,11 +14,10 @@ class ListDrawer @JvmOverloads constructor(
     defStyleAttr: Int = 0,
 ) : View(context, attrs, defStyleAttr) {
     private var zoomRate = 3f
-    private val textSize = 20 * zoomRate
-    private val bgRect = RectF()
-    private var bgRound = 15 * zoomRate
-    private val itemSelectedRect = Rect()
+    private var textSize = 20 * zoomRate
 
+    private val bgRect = RectF()
+    private val itemBackgroundRect = Rect()
     private val textPaint = Paint()
     private val borderPaint = Paint()
     private val bgPaint = Paint()
@@ -26,45 +25,52 @@ class ListDrawer @JvmOverloads constructor(
 
     private var showDialog = false
     private var itemList: List<ListItem> = listOf()
-    private var colorId: Int = R.color.player_color_red
+    private var colorId: Int = R.color.dialog_color_default
 
     override fun onDraw(canvas: Canvas) {
         if (!showDialog) {
             return
         }
 
-        bgPaint.color = Color.WHITE
+        textSize = 20 * zoomRate
+        val strokeWidth = 5 * zoomRate
+        val bgRound = 15 * zoomRate
+        val bgMargin = (width / 20).toFloat()
+        val textMargin = (width / 40).toFloat()
+
         bgRect.set(
-            (width / 20).toFloat(),
+            bgMargin,
             (height / 2 - textSize * (itemList.size + 0.5)).toFloat(),
-            (width * 19 / 20).toFloat(),
+            width - bgMargin,
             height / 2 + textSize * itemList.size,
         )
+        bgPaint.color = ContextCompat.getColor(context, R.color.dialog_background)
         canvas.drawRoundRect(bgRect, bgRound, bgRound, bgPaint)
 
-        itemSelectedPaint.color = Color.CYAN
+        itemSelectedPaint.color =
+            ContextCompat.getColor(context, R.color.dialog_selected_background)
         textPaint.textSize = textSize
         for ((index, item) in itemList.withIndex()) {
             if (item.isSelected) {
-                itemSelectedRect.set(
-                    width * 1 / 20,
-                    (height / 2 - textSize * (itemList.size - index * 2)).toInt(),
-                    width * 19 / 20,
-                    (height / 2 - textSize * (itemList.size - index * 2 - 1.5)).toInt(),
+                itemBackgroundRect.set(
+                    bgMargin.toInt(),
+                    (height / 2 + textSize * (index * 2 - itemList.size)).toInt(),
+                    (width - bgMargin).toInt(),
+                    (height / 2 + textSize * (index * 2 + 1.5 - itemList.size)).toInt(),
                 )
-                canvas.drawRect(itemSelectedRect, itemSelectedPaint)
+                canvas.drawRect(itemBackgroundRect, itemSelectedPaint)
             }
             canvas.drawText(
                 item.name,
-                (width * 3 / 40).toFloat(),
-                (height) / 2 - (itemList.size - index * 2 - 1) * textSize,
+                bgMargin + textMargin,
+                height / 2 + textSize * (index * 2 + 1 - itemList.size),
                 textPaint
             )
         }
 
         borderPaint.style = Paint.Style.STROKE
         borderPaint.color = ContextCompat.getColor(context, colorId)
-        borderPaint.strokeWidth = textSize / 3
+        borderPaint.strokeWidth = strokeWidth
         canvas.drawRoundRect(bgRect, bgRound, bgRound, borderPaint)
     }
 

@@ -15,5 +15,7 @@
 
     <color name="dialog_color_red">#ffeb4034</color>
     <color name="dialog_color_blue">#ff344feb</color>
-    <color name="dialog_color_gray">#5A5855</color>
+    <color name="dialog_color_default">#5a5855</color>
+    <color name="dialog_background">#fffcf7</color>
+    <color name="dialog_selected_background">#46fdff</color>
 </resources>
