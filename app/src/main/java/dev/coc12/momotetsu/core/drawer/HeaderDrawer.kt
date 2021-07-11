@@ -5,6 +5,7 @@ import android.graphics.*
 import android.util.AttributeSet
 import android.view.View
 import androidx.core.content.ContextCompat
+import dev.coc12.momotetsu.R
 import dev.coc12.momotetsu.core.Toolkit
 import dev.coc12.momotetsu.service.Constants
 
@@ -14,26 +15,12 @@ class HeaderDrawer @JvmOverloads constructor(
     defStyleAttr: Int = 0,
 ) : View(context, attrs, defStyleAttr) {
     private var zoomRate = 3f
-    private var height = 100 * zoomRate
-    private var margin = 10 * zoomRate
-    private var bgRound = 15 * zoomRate
-    private var remainingRound = 5 * zoomRate
-    private var borderVertical = 5 * zoomRate
-    private var borderHorizontal = 20 * zoomRate
-    private var dividerWidth = 2 * zoomRate
-    private var dividerMargin = 10 * zoomRate
-    private var textMargin = 10 * zoomRate
 
-    private val borderPaint = Paint()
-    private val borderRect = RectF(margin, margin, width - margin, height + margin)
-    private val bgPaint = Paint()
-    private val bgRect = RectF(
-        margin + borderHorizontal,
-        margin + borderVertical,
-        width - margin - borderHorizontal,
-        height + margin - borderVertical
-    )
+    private val borderRect = RectF()
+    private val bgRect = RectF()
     private val remainingMoveCountRect = RectF()
+    private val borderPaint = Paint()
+    private val bgPaint = Paint()
     private val dividerPaint = Paint()
     private val textPaint = Paint()
 
@@ -47,63 +34,88 @@ class HeaderDrawer @JvmOverloads constructor(
     private var remainingMoveCount: Int = 0
 
     override fun onDraw(canvas: Canvas) {
+        val headerHeight = 100 * zoomRate
+        val headerMargin = 10 * zoomRate
+        val bgRound = 15 * zoomRate
+        val remainingMoveCountRound = 5 * zoomRate
+        val borderWidthVertical = 5 * zoomRate
+        val borderWidthHorizontal = 20 * zoomRate
+        val dividerWidth = 2 * zoomRate
+        val dividerMargin = 10 * zoomRate
+        val textMargin = 10 * zoomRate
+
+        borderRect.set(
+            headerMargin,
+            headerMargin,
+            width - headerMargin,
+            headerHeight + headerMargin,
+        )
         borderPaint.color = ContextCompat.getColor(context, playerColor)
-        borderRect.right = width - margin
         canvas.drawRoundRect(borderRect, bgRound, bgRound, borderPaint)
 
-        bgPaint.color = Color.WHITE
-        bgRect.right = width - margin - borderHorizontal
+        bgRect.set(
+            headerMargin + borderWidthHorizontal,
+            headerMargin + borderWidthVertical,
+            width - headerMargin - borderWidthHorizontal,
+            headerHeight + headerMargin - borderWidthVertical,
+        )
+        bgPaint.color = ContextCompat.getColor(context, R.color.dialog_background)
         canvas.drawRoundRect(bgRect, bgRound, bgRound, bgPaint)
 
         dividerPaint.strokeWidth = dividerWidth
         dividerPaint.color = Color.BLACK
         canvas.drawLine(
-            margin + borderHorizontal + dividerMargin,
-            height / 2 + margin,
-            width - margin - borderHorizontal - dividerMargin,
-            height / 2 + margin,
-            dividerPaint
+            headerMargin + borderWidthHorizontal + dividerMargin,
+            headerHeight / 2 + headerMargin,
+            width - headerMargin - borderWidthHorizontal - dividerMargin,
+            headerHeight / 2 + headerMargin,
+            dividerPaint,
         )
 
-        textPaint.textSize = height / 2 - borderVertical - 2 * textMargin
+        textPaint.textSize = headerHeight / 2 - borderWidthVertical - 2 * textMargin
         canvas.drawText(
             "$playerName",
-            margin + borderHorizontal + textMargin,
-            height / 2 + margin - textMargin,
-            textPaint
+            headerMargin + borderWidthHorizontal + textMargin,
+            headerHeight / 2 + headerMargin - textMargin,
+            textPaint,
         )
         canvas.drawText(
             Toolkit.getFormattedPrice(playerMoney),
             (width / 2).toFloat(),
-            height / 2 + margin - textMargin,
-            textPaint
+            headerHeight / 2 + headerMargin - textMargin,
+            textPaint,
         )
         canvas.drawText(
             "$destination まで $distance ",
-            margin + borderHorizontal + textMargin,
-            height + margin - borderVertical - textMargin,
-            textPaint
+            headerMargin + borderWidthHorizontal + textMargin,
+            headerHeight + headerMargin - borderWidthVertical - textMargin,
+            textPaint,
         )
         canvas.drawText(
             "$year 年目 $month 月",
             (width / 2).toFloat(),
-            height + margin - borderVertical - textMargin,
-            textPaint
+            headerHeight + headerMargin - borderWidthVertical - textMargin,
+            textPaint,
         )
 
         if (remainingMoveCount > 0) {
             remainingMoveCountRect.set(
                 (width / 2).toFloat(),
-                height + borderVertical + textMargin,
-                width - margin - borderHorizontal,
-                height * 3 / 2 + textMargin,
+                headerHeight + borderWidthVertical + textMargin,
+                width - headerMargin - borderWidthHorizontal,
+                headerHeight * 3 / 2 + textMargin,
             )
-            canvas.drawRoundRect(remainingMoveCountRect, remainingRound, remainingRound, bgPaint)
+            canvas.drawRoundRect(
+                remainingMoveCountRect,
+                remainingMoveCountRound,
+                remainingMoveCountRound,
+                bgPaint,
+            )
             canvas.drawText(
                 "あと $remainingMoveCount マス",
                 width / 2 + textMargin,
-                height * 3 / 2,
-                textPaint
+                headerHeight * 3 / 2,
+                textPaint,
             )
         }
     }

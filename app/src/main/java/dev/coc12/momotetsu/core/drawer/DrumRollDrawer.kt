@@ -15,10 +15,8 @@ class DrumRollDrawer @JvmOverloads constructor(
     defStyleAttr: Int = 0,
 ) : View(context, attrs, defStyleAttr) {
     private var zoomRate = 3f
-    private val textSize = 30 * zoomRate
-    private val bgRect = RectF()
-    private var bgRound = 15 * zoomRate
 
+    private val bgRect = RectF()
     private val textPaint = Paint()
     private val borderPaint = Paint()
     private val bgPaint = Paint()
@@ -26,7 +24,7 @@ class DrumRollDrawer @JvmOverloads constructor(
     private var showDialog = false
     private var listItemIndex = 0
     private var listItem: List<String> = listOf()
-    private var colorId: Int = R.color.player_color_red
+    private var colorId: Int = R.color.dialog_color_default
 
     override fun onDraw(canvas: Canvas) {
         if (!showDialog) {
@@ -34,18 +32,23 @@ class DrumRollDrawer @JvmOverloads constructor(
         }
 
         val text = listItem[listItemIndex]
-        bgPaint.color = Color.WHITE
+        val textSize = 30 * zoomRate
+        val strokeWidth = 10 * zoomRate
+        val bgRound = 15 * zoomRate
+        val bgMargin = (width / 8).toFloat()
+
         bgRect.set(
-            (width / 8).toFloat(),
+            bgMargin,
             height / 2 - textSize,
-            (width * 7 / 8).toFloat(),
+            width - bgMargin,
             height / 2 + textSize,
         )
+        bgPaint.color = ContextCompat.getColor(context, R.color.dialog_background)
         canvas.drawRoundRect(bgRect, bgRound, bgRound, bgPaint)
 
         borderPaint.style = Paint.Style.STROKE
         borderPaint.color = ContextCompat.getColor(context, colorId)
-        borderPaint.strokeWidth = textSize / 3
+        borderPaint.strokeWidth = strokeWidth
         canvas.drawRoundRect(bgRect, bgRound, bgRound, borderPaint)
 
         textPaint.textSize = textSize
@@ -53,7 +56,7 @@ class DrumRollDrawer @JvmOverloads constructor(
             text,
             (width - textPaint.measureText(text)) / 2,
             (height - textPaint.descent() - textPaint.ascent()) / 2,
-            textPaint
+            textPaint,
         )
     }
 

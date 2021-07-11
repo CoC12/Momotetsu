@@ -2,12 +2,12 @@ package dev.coc12.momotetsu.core.drawer
 
 import android.content.Context
 import android.graphics.Canvas
-import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Rect
 import android.util.AttributeSet
 import android.view.View
 import android.widget.ScrollView
+import androidx.core.content.ContextCompat
 import dev.coc12.momotetsu.R
 import dev.coc12.momotetsu.core.manager.MapManager
 import dev.coc12.momotetsu.core.PlayerList
@@ -26,26 +26,31 @@ class MapDrawer @JvmOverloads constructor(
 ) : View(context, attrs, defStyleAttr) {
     val mapManager: MapManager = MapManager(context)
     private val chipSize = 32
-    private val dp = resources.displayMetrics.density
     private val mapChip = Loader(context).loadChipSet(R.drawable.chipset, chipSize)
     private val playerBmpList = Loader(context).loadImageAssets(Constants.ASSET_PLAYER_CARS)
-    private val srcRect = Rect(0, 0, playerBmpList[0].width, playerBmpList[0].height)
-    private val stations = getStations()
 
+    private val stations = getStations()
     var playerList: PlayerList? = null
+
+    private val playerSrcRect =
+        Rect(0, 0, playerBmpList.first().width, playerBmpList.first().height)
+    private val playerRect = Rect()
+    private val chipsetSrcRect = Rect(0, 0, chipSize, chipSize)
+    private val chipsetRect = Rect()
+    private val placeNameBgRect = Rect()
+
     private val paint = Paint()
     private val textPaint = Paint()
     private val placeNameBgPaint = Paint()
-    private val placeNameBgRect = Rect()
     private val placeNameBorderPaint = Paint()
-    private val placeNameBorderRect = Rect()
-    private var zoomRate = 1.5
+
+    private var zoomRate = 4
     private var realChipSize: Int = 0
     private var screenWidth: Int = 0
     private var screenHeight: Int = 0
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
-        realChipSize = (chipSize * zoomRate * dp).toInt()
+        realChipSize = chipSize * zoomRate
         screenWidth = widthMeasureSpec
         screenHeight = heightMeasureSpec
 
@@ -69,15 +74,16 @@ class MapDrawer @JvmOverloads constructor(
     private fun drawMap(canvas: Canvas) {
         for ((y, mapRow) in mapManager.withIndex()) {
             for ((x, chip) in mapRow.withIndex()) {
+                chipsetRect.set(
+                    x * realChipSize,
+                    y * realChipSize,
+                    (x + 1) * realChipSize,
+                    (y + 1) * realChipSize
+                )
                 canvas.drawBitmap(
-                    mapChip[Integer.parseInt(chip)],
-                    Rect(0, 0, chipSize, chipSize),
-                    Rect(
-                        x * realChipSize,
-                        y * realChipSize,
-                        (x + 1) * realChipSize,
-                        (y + 1) * realChipSize
-                    ),
+                    mapChip[chip.toInt()],
+                    chipsetSrcRect,
+                    chipsetRect,
                     paint
                 )
             }
@@ -91,13 +97,13 @@ class MapDrawer @JvmOverloads constructor(
      */
     private fun drawPlayer(canvas: Canvas) {
         for ((index, player) in playerList!!.withIndex()) {
-            val playerRect = Rect(
+            playerRect.set(
                 ((player.positionX + 0.5) * realChipSize).toInt(),
                 ((player.positionY + 1.5) * realChipSize - realChipSize * 2).toInt(),
                 ((player.positionX + 0.5) * realChipSize + realChipSize * 2).toInt(),
                 ((player.positionY + 1.5) * realChipSize - realChipSize * 2 + realChipSize).toInt()
             )
-            canvas.drawBitmap(playerBmpList[index], srcRect, playerRect, paint)
+            canvas.drawBitmap(playerBmpList[index], playerSrcRect, playerRect, paint)
         }
     }
 
@@ -108,34 +114,26 @@ class MapDrawer @JvmOverloads constructor(
      */
     private fun drawPlaceName(canvas: Canvas) {
         val textSize = (realChipSize * 5 / 12).toFloat()
-        val placeNameBorderWidth = realChipSize / 20
+
         textPaint.textSize = textSize
-        placeNameBorderPaint.color = Color.DKGRAY
-        placeNameBgPaint.color = Color.WHITE
+        placeNameBgPaint.color = ContextCompat.getColor(context, R.color.dialog_background)
+        placeNameBorderPaint.style = Paint.Style.STROKE
+        placeNameBorderPaint.color = ContextCompat.getColor(context, R.color.dialog_color_default)
+        placeNameBorderPaint.strokeWidth = (realChipSize / 15).toFloat()
 
         for (station in stations) {
-            val bgLeft = (station.positionX + 0.9) * realChipSize
-            val bgTop = (station.positionY + 1.1) * realChipSize
-            val bgRight =
-                (station.positionX + 1.1) * realChipSize + textPaint.measureText(station.name)
-            val bgBottom = (station.positionY + 1.3) * realChipSize + textSize
-
-            placeNameBorderRect.set(
-                bgLeft.toInt(),
-                bgTop.toInt(),
-                bgRight.toInt(),
-                bgBottom.toInt(),
-            )
-            canvas.drawRect(placeNameBorderRect, placeNameBorderPaint)
+            val name = station.name
             placeNameBgRect.set(
-                bgLeft.toInt() + placeNameBorderWidth,
-                bgTop.toInt() + placeNameBorderWidth,
-                bgRight.toInt() - placeNameBorderWidth,
-                bgBottom.toInt() - placeNameBorderWidth,
+                ((station.positionX + 0.9) * realChipSize).toInt(),
+                ((station.positionY + 1.1) * realChipSize).toInt(),
+                ((station.positionX + 1.1) * realChipSize + textPaint.measureText(name)).toInt(),
+                ((station.positionY + 1.3) * realChipSize + textSize).toInt(),
             )
             canvas.drawRect(placeNameBgRect, placeNameBgPaint)
+            canvas.drawRect(placeNameBgRect, placeNameBorderPaint)
+
             canvas.drawText(
-                station.name!!,
+                name!!,
                 ((station.positionX + 1) * realChipSize).toFloat(),
                 ((station.positionY + 1.1) * realChipSize + textSize).toFloat(),
                 textPaint
