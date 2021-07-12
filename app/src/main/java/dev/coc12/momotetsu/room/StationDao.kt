@@ -13,6 +13,10 @@ interface StationDao {
     fun getAll(): List<Station>
 
     @Transaction
+    @Query("SELECT * FROM station WHERE code = :stationCode")
+    fun getStation(stationCode: String): Station
+
+    @Transaction
     @Query("SELECT * FROM station WHERE positionX = :poX and positionY = :poY")
     fun getStation(poX: Int, poY: Int): Station
 }

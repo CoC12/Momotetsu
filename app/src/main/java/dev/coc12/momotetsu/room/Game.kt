@@ -9,6 +9,7 @@ data class Game(
     var gameId: Long = 0,
     var months: Int = 0,
     var turnIndex: Int = 0,
+    val destinationStationCode: String = "wakkanai",
 ) {
 
     /**

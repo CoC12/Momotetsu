@@ -8,6 +8,7 @@ import android.widget.RelativeLayout
 import android.widget.ScrollView
 import dev.coc12.momotetsu.R
 import dev.coc12.momotetsu.core.PlayerList
+import dev.coc12.momotetsu.core.Point
 import dev.coc12.momotetsu.core.RealEstateListItem
 import dev.coc12.momotetsu.core.Toolkit
 import dev.coc12.momotetsu.core.drawer.*
@@ -40,6 +41,7 @@ class GameManager(
     private val interfaceManager: InterfaceManager = InterfaceManager(context)
 
     private var game = Game()
+    private var destination: Station
     private var moveCount: Int = 0
     private val moveStack = ArrayDeque<Pair<Int, Int>>()
     private var selectedPosX: Int = 0
@@ -63,6 +65,7 @@ class GameManager(
         getOrCreate.start()
         getOrCreate.join()
 
+        destination = getStation(game.destinationStationCode)!!
         mapDrawer.setOnTouchListener { _, event ->
             mapDrawer.performClick()
             clickMap(event)
@@ -130,12 +133,16 @@ class GameManager(
      * ヘッダ表示を更新します。
      */
     private fun updateHeader() {
+        val turnPlayer = playerList.getTurnPlayer()
         headerDrawer.set(
             Constants.PLAYER_COLORS[game.turnIndex],
             playerList.getTurnPlayer().name,
             playerList.getTurnPlayer().money,
-            "稚内",
-            49,
+            destination.name!!,
+            mapDrawer.mapManager.getDistance(
+                Point(turnPlayer.positionX, turnPlayer.positionY),
+                Point(destination.positionX, destination.positionY),
+            ),
             game.getYearMonth().first,
             game.getYearMonth().second,
             moveCount - moveStack.size,
@@ -512,6 +519,22 @@ class GameManager(
         loadStation.start()
         loadStation.join()
         return if (station == null) null else station!!
+    }
+
+    /**
+     * 駅情報を取得する。
+     *
+     * @param stationCode String 物件駅コード
+     * @return 駅情報 Station
+     */
+    private fun getStation(stationCode: String): Station? {
+        var station: Station? = null
+        val loadStation = Thread {
+            station = stationDao.getStation(stationCode)
+        }
+        loadStation.start()
+        loadStation.join()
+        return station
     }
 
     /**
