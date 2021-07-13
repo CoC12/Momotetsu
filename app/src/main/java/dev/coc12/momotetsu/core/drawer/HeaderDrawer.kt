@@ -28,7 +28,7 @@ class HeaderDrawer @JvmOverloads constructor(
     private var playerName: String? = null
     private var playerMoney: Int = 0
     private var destination: String? = null
-    private var distance: Int = 0
+    private var distance: Int? = 0
     private var year: Int = 0
     private var month: Int = 0
     private var remainingMoveCount: Int = 0
@@ -86,7 +86,7 @@ class HeaderDrawer @JvmOverloads constructor(
             textPaint,
         )
         canvas.drawText(
-            "$destination まで $distance ",
+            "$destination まで ${if (distance == null) "??" else distance} ",
             headerMargin + borderWidthHorizontal + textMargin,
             headerHeight + headerMargin - borderWidthVertical - textMargin,
             textPaint,
@@ -121,7 +121,7 @@ class HeaderDrawer @JvmOverloads constructor(
     }
 
     fun set(
-        playerColor: Int, playerName: String, playerMoney: Int, destination: String, distance: Int,
+        playerColor: Int, playerName: String, playerMoney: Int, destination: String, distance: Int?,
         year: Int, month: Int, remainingMoveCount: Int
     ) {
         this.playerColor = playerColor
