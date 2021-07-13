@@ -8,7 +8,6 @@ import android.widget.RelativeLayout
 import android.widget.ScrollView
 import dev.coc12.momotetsu.R
 import dev.coc12.momotetsu.core.PlayerList
-import dev.coc12.momotetsu.core.Point
 import dev.coc12.momotetsu.core.RealEstateListItem
 import dev.coc12.momotetsu.core.Toolkit
 import dev.coc12.momotetsu.core.drawer.*
@@ -140,8 +139,8 @@ class GameManager(
             playerList.getTurnPlayer().money,
             destination.name!!,
             mapDrawer.mapManager.getDistance(
-                Point(turnPlayer.positionX, turnPlayer.positionY),
-                Point(destination.positionX, destination.positionY),
+                Pair(turnPlayer.positionX, turnPlayer.positionY),
+                Pair(destination.positionX, destination.positionY),
             ),
             game.getYearMonth().first,
             game.getYearMonth().second,
